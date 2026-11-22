@@ -98,14 +98,20 @@ jobs:
           export PATH="/home/runner/.local/bin:$PATH"
           godot4 --version
           godot4 --headless --import --quit
-          godot4 --headless --export-debug "Android" "build/${APK_NAME}"
-          ls -lh "build/${APK_NAME}"
+          OUT_APK="build/drip-v0.2-build${GITHUB_RUN_NUMBER}.apk"
+          godot4 --headless --export-debug "Android" "$OUT_APK"
+          SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          APKSIGNER="$(ls -d "${SDK_PATH}"/build-tools/*/apksigner | sort -V | tail -n 1)"
+          echo "Verifying APK with: $APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$OUT_APK"
+          ls -lh "$OUT_APK"
+          echo "OUT_APK=$OUT_APK" >> "$GITHUB_ENV"
 
       - name: Upload APK build artifact
         uses: actions/upload-artifact@v4
         with:
           name: drip-debug-apk
-          path: build/${{ env.APK_NAME }}
+          path: ${{ env.OUT_APK }}
 
       - name: Publish GitHub Release with debug APK
         env:
@@ -114,9 +120,9 @@ jobs:
           SHORT_SHA="${GITHUB_SHA::7}"
           TAG="build-${GITHUB_RUN_NUMBER}-${SHORT_SHA}"
           TITLE="DRIP Debug APK (Build #${GITHUB_RUN_NUMBER})"
-          NOTES="Automated Android debug build from commit \`${SHORT_SHA}\`. Download \`${APK_NAME}\` below and install it on your Android device (enable *Install unknown apps* if prompted)."
+          NOTES="Automated Android debug build from commit \`${SHORT_SHA}\`. Download \`$(basename "$OUT_APK")\` below and install it on your Android device (if upgrading from Build #1, fully uninstall Build #1 via Settings -> Apps -> DRIP first)."
 
-          gh release create "$TAG" "build/${APK_NAME}" \
+          gh release create "$TAG" "$OUT_APK" \
             --title "$TITLE" \
             --notes "$NOTES" \
             --latest
