@@ -57,19 +57,16 @@ jobs:
           mv /tmp/templates_out/templates/* /home/runner/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable/
           rm -rf /tmp/templates.tpz /tmp/templates_out
 
-      - name: Configure Android SDK and debug keystore for Godot
+      - name: Configure Android SDK and persistent debug keystore for Godot
         run: |
           mkdir -p /home/runner/.config/godot
           mkdir -p build
 
-          # Ensure Android SDK path is available
           SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           echo "Using Android SDK at: $SDK_PATH"
-          ls -la "$SDK_PATH/build-tools"
 
-          # Generate standard Android debug keystore
-          KEYSTORE_PATH="/home/runner/.android/debug.keystore"
-          mkdir -p /home/runner/.android
+          # Use persistent debug keystore so every future build updates in-place cleanly on Android
+          KEYSTORE_PATH="${GITHUB_WORKSPACE}/tools/drip-debug.keystore"
           if [ ! -f "$KEYSTORE_PATH" ]; then
             keytool -genkeypair \
               -keystore "$KEYSTORE_PATH" \
@@ -79,8 +76,11 @@ jobs:
               -keyalg RSA \
               -keysize 2048 \
               -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
+              -dname "CN=DRIP Debug,O=TheProbyte,C=US"
           fi
+
+          # Monotonically increment Android versionCode per workflow run
+          sed -i "s/^version\/code=.*/version\/code=${GITHUB_RUN_NUMBER}/" export_presets.cfg
 
           cat > /home/runner/.config/godot/editor_settings-4.3.tres <<EOF
           [gd_resource type="EditorSettings" format=3]

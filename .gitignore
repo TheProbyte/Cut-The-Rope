@@ -4,6 +4,7 @@ build/
 *.aab
 *.idsig
 *.keystore
+!tools/drip-debug.keystore
 __pycache__/
 *.pyc
 .DS_Store
