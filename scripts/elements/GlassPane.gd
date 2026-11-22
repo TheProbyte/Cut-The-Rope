@@ -12,6 +12,7 @@ var _collider: CollisionShape2D
 var _detector: Area2D
 var _overlapping: Array[Droplet] = []
 var _shards: Array[Dictionary] = []
+var _flash: float = 0.0
 
 
 func configure(cfg: Dictionary) -> void:
@@ -86,6 +87,7 @@ func _shatter(droplet: Droplet) -> void:
 	_detector.set_deferred("monitoring", false)
 	AudioManager.play_sfx("glass_shatter")
 	shattered_impact.emit(global_position)
+	_flash = 1.0
 
 	if droplet.linear_velocity.length() < 90.0:
 		droplet.linear_velocity += Vector2(0.0, 95.0)
@@ -111,7 +113,9 @@ func _process(delta: float) -> void:
 	if not shattered:
 		queue_redraw()
 		return
-	if _shards.is_empty():
+	_flash = maxf(0.0, _flash - delta * 5.0)
+	if _shards.is_empty() and _flash <= 0.0:
+		queue_redraw()
 		return
 	var grav := Vector2(0.0, 540.0).rotated(-rotation)
 	for i in range(_shards.size() - 1, -1, -1):
@@ -128,23 +132,31 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	var half := Vector2(length * 0.5, thickness * 0.5)
 	if not shattered:
-		var half := Vector2(length * 0.5, thickness * 0.5)
 		var rect := Rect2(-half, Vector2(length, thickness))
-		draw_rect(Rect2(-half + Vector2(2, 4), Vector2(length, thickness)), Color(0.12, 0.30, 0.34, 0.14))
-		draw_rect(rect, Color(0.68, 0.93, 0.98, 0.58))
-		draw_rect(Rect2(-half.x, -half.y, length, thickness * 0.38), Color(1.0, 1.0, 1.0, 0.38))
-		var gx := -half.x + 18.0
+		var sh := rect
+		sh.position += Vector2(2.0, 6.0).rotated(-rotation)
+		Art.draw_rrect(self, sh, 4.0, Color(0.10, 0.26, 0.30, 0.12))
+		Art.draw_glow(self, Vector2.ZERO, half.x * 0.9, Color(0.75, 0.96, 1.0, 0.18))
+		Art.draw_rrect_grad(self, rect, 4.0, Color(0.86, 0.98, 1.0, 0.70), Color(0.58, 0.86, 0.94, 0.62))
+		draw_rect(Rect2(-half.x + 4.0, -half.y + 2.0, length - 8.0, thickness * 0.3), Color(1, 1, 1, 0.55))
+		var gx := -half.x + 20.0
 		while gx < half.x - 14.0:
-			draw_line(Vector2(gx, -half.y + 1.5), Vector2(gx - 8.0, half.y - 1.5), Color(1.0, 1.0, 1.0, 0.72), 2.4, true)
-			gx += 32.0
-		# Animated traveling sparkle glint
-		var glint_x := lerpf(-half.x + 12.0, half.x - 12.0, fmod(_time * 0.45, 1.0))
-		draw_line(Vector2(glint_x, -half.y), Vector2(glint_x - 12.0, half.y), Color(1.0, 1.0, 1.0, 0.78), 4.5, true)
-		draw_rect(rect, Color(0.42, 0.78, 0.88, 0.94), false, 2.2)
-		draw_rect(Rect2(-half.x - 2.0, -half.y - 2.0, 9.0, thickness + 4.0), Color(0.54, 0.64, 0.66))
-		draw_rect(Rect2(half.x - 7.0, -half.y - 2.0, 9.0, thickness + 4.0), Color(0.54, 0.64, 0.66))
+			draw_line(Vector2(gx, -half.y + 2.0), Vector2(gx - 7.0, half.y - 2.0), Color(1, 1, 1, 0.65), 2.2, true)
+			draw_line(Vector2(gx + 6.0, -half.y + 3.0), Vector2(gx + 2.0, half.y - 3.0), Color(1, 1, 1, 0.35), 1.2, true)
+			gx += 34.0
+		var glint_x := lerpf(-half.x - 20.0, half.x + 20.0, fmod(_time * 0.4, 1.4) / 1.4)
+		if absf(glint_x) < half.x - 10.0:
+			draw_line(Vector2(glint_x, -half.y + 1.0), Vector2(glint_x - 10.0, half.y - 1.0), Color(1, 1, 1, 0.85), 5.0, true)
+		Art.draw_rrect_outline(self, rect, 4.0, Color(0.30, 0.66, 0.80, 0.95), 2.2)
+		for sx: float in [-1.0, 1.0]:
+			var clamp := Rect2(Vector2(sx * half.x - (9.0 if sx > 0 else 0.0), -half.y - 3.0), Vector2(9.0, thickness + 6.0))
+			Art.draw_rrect(self, clamp, 3.0, Color(0.50, 0.60, 0.62))
+			draw_circle(clamp.get_center(), 1.8, Color(0.86, 0.92, 0.94))
 	else:
+		if _flash > 0.0:
+			Art.draw_glow(self, Vector2.ZERO, half.x * 1.4, Color(0.9, 1.0, 1.0, _flash * 0.8))
 		for s in _shards:
 			var a: float = clampf(float(s["life"]) / float(s["max_life"]), 0.0, 1.0)
 			var p: Vector2 = s["pos"]
@@ -155,5 +167,7 @@ func _draw() -> void:
 				p + Vector2(-sz * 0.6, sz * 0.65).rotated(r),
 				p + Vector2(-sz * 0.5, -sz * 0.7).rotated(r),
 			])
-			draw_colored_polygon(tri, Color(0.76, 0.96, 1.0, 0.88 * a))
-			draw_polyline(tri, Color(1.0, 1.0, 1.0, 0.75 * a), 1.2, true)
+			draw_colored_polygon(tri, Color(0.76, 0.96, 1.0, 0.85 * a))
+			draw_polyline(Art.closed(tri), Color(1.0, 1.0, 1.0, 0.85 * a), 1.3, true)
+			if int(sz * 10.0) % 3 == 0:
+				Art.draw_sparkle(self, p, sz * 0.7 * a, Color(1, 1, 1, a))

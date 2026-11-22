@@ -2,7 +2,7 @@
   "id": "greenhouse_10",
   "world": "greenhouse",
   "title": "Glasshouse Finale",
-  "hint": "Combine everything: cross the grate & smash glass as Ice, ride the Heat Lamp & Fan to the Cold Pipe!",
+  "hint": "Cross the grate and smash the glass as Ice, then ride the Heat Lamp and Fan to the Cold Pipe!",
   "spawn": { "pos": [110, 185], "state": "water" },
   "seedling": { "pos": [430, 1015] },
   "collectibles": [

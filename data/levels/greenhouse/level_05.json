@@ -2,7 +2,7 @@
   "id": "greenhouse_05",
   "world": "greenhouse",
   "title": "Frost Pocket",
-  "hint": "Freezer zones snap your droplet into heavy Ice—perfect for smashing glass and crossing grates!",
+  "hint": "Freezer zones snap you into heavy Ice: perfect for smashing glass and crossing grates!",
   "spawn": { "pos": [140, 855], "state": "water" },
   "seedling": { "pos": [600, 965] },
   "collectibles": [

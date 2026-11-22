@@ -40,22 +40,27 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var hw := width * 0.5
-	var rim := Rect2(-hw - 6.0, -14.0, width + 12.0, 28.0)
+	var rim := Rect2(-hw - 8.0, -15.0, width + 16.0, 30.0)
+	Art.draw_rrect(self, Rect2(rim.position + Vector2(2, 5), rim.size), 12.0, Color(0.10, 0.10, 0.12, 0.18))
+	Art.draw_rrect_grad(self, rim, 12.0, Color(0.70, 0.40, 0.34), Color(0.48, 0.22, 0.20))
+	# danger glow
+	var pulse := 0.45 + 0.35 * sin(_time * 4.5)
+	Art.draw_rrect_outline(self, rim.grow(2.0), 14.0, Color(1.0, 0.42, 0.32, pulse * 0.8), 2.4)
+	# dark swirling hole
 	var pit := Rect2(-hw, -9.0, width, 18.0)
-
-	# Outer warning terracotta/iron rim
-	draw_rect(rim, Color(0.52, 0.24, 0.22))
-	draw_rect(rim, Color(0.86, 0.36, 0.28, 0.9), false, 2.4)
-
-	# Dark recessed drain opening
-	draw_rect(pit, Color(0.14, 0.14, 0.17))
-
-	# Animated subtle danger bars & suction shimmer
-	var bar_step := 14.0
+	Art.draw_rrect_grad(self, pit, 8.0, Color(0.06, 0.07, 0.10), Color(0.16, 0.18, 0.24))
+	for k in range(3):
+		var a0 := -_time * (3.0 + float(k)) + float(k) * 2.1
+		var rx := hw * (0.75 - float(k) * 0.2)
+		var pts := PackedVector2Array()
+		for i in range(8):
+			var a := a0 + float(i) * 0.25
+			pts.append(Vector2(cos(a) * rx, sin(a) * 6.0 * (0.8 - float(k) * 0.2)))
+		draw_polyline(pts, Color(0.30, 0.48, 0.62, 0.55 - float(k) * 0.12), 1.8, true)
+	# grate bars over the hole
 	var x := -hw + 10.0
 	while x < hw - 6.0:
-		draw_line(Vector2(x, -8.0), Vector2(x, 8.0), Color(0.32, 0.30, 0.34), 2.5)
-		x += bar_step
-
-	var pulse := 0.45 + 0.35 * sin(_time * 4.5)
-	draw_line(Vector2(-hw + 4.0, -13.0), Vector2(hw - 4.0, -13.0), Color(0.98, 0.44, 0.34, pulse), 2.2)
+		draw_line(Vector2(x, -8.0), Vector2(x, 8.0), Color(0.36, 0.34, 0.38), 3.0, true)
+		draw_line(Vector2(x - 1.0, -8.0), Vector2(x - 1.0, 8.0), Color(0.64, 0.62, 0.66, 0.6), 1.0)
+		x += 14.0
+	draw_line(Vector2(-hw - 4.0, -13.0), Vector2(hw + 4.0, -13.0), Color(1.0, 0.70, 0.60, 0.55), 2.0, true)

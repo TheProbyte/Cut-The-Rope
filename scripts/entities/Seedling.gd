@@ -15,6 +15,15 @@ var _sensor: Area2D
 var _overlapping_droplet: Droplet = null
 var _tracked_droplet: Droplet = null
 var _look_dir: Vector2 = Vector2.ZERO
+## Menu showcases: look at this global point when no droplet is tracked.
+var look_target: Vector2 = Vector2.INF
+var excite_override: float = -1.0
+var _bloom_delay: float = -1.0
+var _hop: float = 0.0
+var _hop_vel: float = 0.0
+var _sparkles: Array[Dictionary] = []
+var _blink_timer: float = 3.0
+var _blinking: bool = false
 
 
 func track_droplet(droplet: Droplet) -> void:
@@ -111,7 +120,16 @@ func _evaluate_droplet(droplet: Droplet, just_entered: bool) -> void:
 func _bloom(droplet: Droplet) -> void:
 	is_bloomed = true
 	droplet.freeze_for_end()
-	droplet.visible = false
+	droplet.play_end_anim("absorb", global_position + Vector2(0, 2))
+	_bloom_delay = 0.34
+	watered.emit()
+
+
+## Starts the bloom celebration (also used by menu showcases).
+func play_bloom() -> void:
+	is_bloomed = true
+	_bloom_delay = -1.0
+	_hop_vel = -9.0
 	AudioManager.play_sfx("seedling_bloom")
 
 	var colors := [
@@ -131,26 +149,54 @@ func _bloom(droplet: Droplet) -> void:
 			"max_life": 1.6,
 			"size": randf_range(4.5, 8.2),
 			"color": colors[i % colors.size()],
+			"rot": randf_range(0, TAU),
+			"vrot": randf_range(-8, 8),
 		})
-	watered.emit()
+	for i in range(12):
+		_sparkles.append({
+			"ang": TAU * float(i) / 12.0,
+			"life": randf_range(0.6, 1.1),
+			"max_life": 1.1,
+			"dist": randf_range(30, 46),
+		})
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	if is_bloomed:
-		_bloom_t = minf(1.0, _bloom_t + delta * 2.5)
+	if _bloom_delay > 0.0:
+		_bloom_delay -= delta
+		if _bloom_delay <= 0.0:
+			play_bloom()
+	if is_bloomed and _bloom_delay <= 0.0:
+		_bloom_t = minf(1.0, _bloom_t + delta * 1.8)
 	if _shiver_timer > 0.0:
 		_shiver_timer = maxf(0.0, _shiver_timer - delta)
 
-	# Eye tracking & anticipation excitement (Om Nom style!)
+	# Springy hop
+	var acc := -160.0 * _hop - 10.0 * _hop_vel
+	_hop_vel += acc * delta
+	_hop += _hop_vel * delta
+
+	_blink_timer -= delta
+	if _blink_timer <= 0.0:
+		_blinking = not _blinking
+		_blink_timer = 0.12 if _blinking else randf_range(2.0, 4.5)
+
+	# Eye tracking & anticipation excitement
 	var target_excite := 0.0
 	if not is_bloomed and _tracked_droplet != null and is_instance_valid(_tracked_droplet) and _tracked_droplet.active:
 		var delta_v := _tracked_droplet.global_position - (global_position + Vector2(0, -34))
 		var dist := delta_v.length()
 		if dist > 4.0:
 			_look_dir = _look_dir.lerp(delta_v.normalized(), clampf(delta * 8.0, 0.0, 1.0))
-		if dist < 210.0 and _tracked_droplet.is_water() and not _tracked_droplet.soaked:
-			target_excite = clampf(1.0 - (dist / 210.0), 0.0, 1.0)
+		if dist < 230.0 and _tracked_droplet.is_water() and not _tracked_droplet.soaked:
+			target_excite = clampf(1.0 - (dist / 230.0), 0.0, 1.0)
+	elif look_target != Vector2.INF:
+		var dv := look_target - (global_position + Vector2(0, -34) * scale)
+		if dv.length() > 4.0:
+			_look_dir = _look_dir.lerp(dv.normalized(), clampf(delta * 6.0, 0.0, 1.0))
+	if excite_override >= 0.0 and not is_bloomed:
+		target_excite = excite_override
 	_excite_t = lerpf(_excite_t, target_excite, clampf(delta * 7.0, 0.0, 1.0))
 
 	for i in range(_confetti.size() - 1, -1, -1):
@@ -160,9 +206,11 @@ func _process(delta: float) -> void:
 			_confetti.remove_at(i)
 		else:
 			var vel: Vector2 = c["vel"]
-			vel.y += 280.0 * delta
+			vel.y += 300.0 * delta
+			vel.x *= 1.0 - delta * 1.2
 			c["vel"] = vel
 			c["pos"] = (c["pos"] as Vector2) + vel * delta
+			c["rot"] = float(c["rot"]) + float(c["vrot"]) * delta
 
 	for i in range(_frost_puffs.size() - 1, -1, -1):
 		var f: Dictionary = _frost_puffs[i]
@@ -172,165 +220,203 @@ func _process(delta: float) -> void:
 		else:
 			f["pos"] = (f["pos"] as Vector2) + (f["vel"] as Vector2) * delta
 
+	for i in range(_sparkles.size() - 1, -1, -1):
+		var sp: Dictionary = _sparkles[i]
+		sp["life"] = float(sp["life"]) - delta
+		sp["dist"] = float(sp["dist"]) + delta * 40.0
+		if float(sp["life"]) <= 0.0:
+			_sparkles.remove_at(i)
+
 	queue_redraw()
 
 
+static func _elastic(t: float) -> float:
+	if t <= 0.0:
+		return 0.0
+	if t >= 1.0:
+		return 1.0
+	return pow(2.0, -10.0 * t) * sin((t * 10.0 - 0.75) * (TAU / 3.0)) + 1.0
+
+
 func _draw() -> void:
-	var shiver_x := sin(_time * 48.0) * 4.5 * (_shiver_timer / 0.65) if _shiver_timer > 0.0 else 0.0
+	var shiver_x := sin(_time * 48.0) * 4.0 * (_shiver_timer / 0.65) if _shiver_timer > 0.0 else 0.0
 	var bx := shiver_x
+	var hop := minf(0.0, _hop) * 3.0
+	var squash := clampf(_hop * 0.05, -0.12, 0.12)
+	var bloom_e := _elastic(_bloom_t)
 
-	# Soft warm ground shadow under pot
-	draw_circle(Vector2(0, 45), 40.0, Color(0.14, 0.22, 0.14, 0.20))
+	Art.draw_ground_shadow(self, Vector2(2, 46), 40.0 - hop * 0.2, 7.0, 0.22)
 
-	# Radiant sunlit halo behind bloomed seedling
-	if _bloom_t > 0.05:
-		var halo_center := Vector2(bx, -52.0)
-		draw_circle(halo_center, 58.0 * _bloom_t, Color(1.0, 0.90, 0.38, 0.20 * _bloom_t))
-		for i in range(10):
-			var a := _time * 0.7 + TAU * float(i) / 10.0
-			draw_line(
-				halo_center + Vector2.from_angle(a) * (26.0 * _bloom_t),
-				halo_center + Vector2.from_angle(a) * (54.0 * _bloom_t),
-				Color(1.0, 0.92, 0.45, 0.42 * _bloom_t),
-				3.2,
-				true
-			)
+	# Radiant halo behind bloomed flower
+	if _bloom_t > 0.02:
+		var halo := Vector2(bx, -58.0 + hop)
+		Art.draw_glow(self, halo, 90.0 * bloom_e, Color(1.0, 0.86, 0.36, 0.55 * _bloom_t))
+		for i in range(12):
+			var a := _time * 0.6 + TAU * float(i) / 12.0
+			draw_line(halo + Vector2.from_angle(a) * 34.0 * bloom_e, halo + Vector2.from_angle(a) * (58.0 + 6.0 * sin(_time * 3.0 + float(i))) * bloom_e,
+				Color(1.0, 0.92, 0.5, 0.45 * _bloom_t), 3.0, true)
 
-	# Terracotta pot with cozy curved highlight & shading
-	var pot := PackedVector2Array([
-		Vector2(-36 + bx, 4),
-		Vector2(36 + bx, 4),
-		Vector2(28 + bx, 44),
-		Vector2(-28 + bx, 44),
-	])
-	draw_colored_polygon(pot, Color(0.82, 0.44, 0.27))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(-28 + bx, 6), Vector2(-12 + bx, 6),
-		Vector2(-15 + bx, 42), Vector2(-24 + bx, 42),
-	]), Color(0.94, 0.62, 0.44, 0.42))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(14 + bx, 4), Vector2(36 + bx, 4),
-		Vector2(28 + bx, 44), Vector2(12 + bx, 44),
-	]), Color(0.64, 0.30, 0.18, 0.50))
-	var pot_outline := pot.duplicate()
-	pot_outline.append(pot[0])
-	draw_polyline(pot_outline, Color(0.50, 0.24, 0.14), 2.2, true)
+	draw_set_transform(Vector2(bx, hop), 0.0, Vector2(1.0 + squash, 1.0 - squash))
 
-	# Rich soil mound
-	draw_rect(Rect2(-34 + bx, 0, 68, 10), Color(0.32, 0.21, 0.14))
-	draw_circle(Vector2(-14 + bx, 2), 6.0, Color(0.38, 0.25, 0.16))
-	draw_circle(Vector2(12 + bx, 2), 5.5, Color(0.38, 0.25, 0.16))
+	# Stem posture: droopy -> perks up with excitement -> tall bloom
+	var perk := maxf(bloom_e, _excite_t * 0.7)
+	var droop := 1.0 - clampf(perk, 0.0, 1.0)
+	var sway_spd := 3.6 if is_bloomed else (7.0 if _excite_t > 0.3 else 2.0)
+	var sway := sin(_time * sway_spd) * (3.0 if is_bloomed else (3.0 if _excite_t > 0.3 else 2.4))
+	var head_pos := Vector2(droop * 12.0 + sway, lerpf(-30.0, -60.0, perk))
+	var ctrl := Vector2(droop * 16.0 + sway * 0.3, lerpf(-14.0, -30.0, perk))
+	var stem := PackedVector2Array()
+	for i in range(9):
+		var t := float(i) / 8.0
+		stem.append(Vector2.ZERO.lerp(ctrl, t).lerp(ctrl.lerp(head_pos, t), t))
+	draw_polyline(stem, Art.LEAF_DEEP, 8.0, true)
+	draw_polyline(stem, Color(0.46, 0.82, 0.42), 3.6, true)
 
-	# Pot rim with rounded lip highlight
-	var rim := Rect2(-41 + bx, -3, 82, 13)
-	draw_rect(rim, Color(0.88, 0.50, 0.32))
-	draw_rect(Rect2(-39 + bx, -2, 78, 4), Color(0.98, 0.72, 0.54, 0.65))
-	draw_rect(rim, Color(0.52, 0.24, 0.14), false, 2.2)
+	# Leaves
+	var leaf_root := stem[3]
+	_draw_leaf(leaf_root, lerpf(-2.3, -2.75, perk) - sway * 0.02, 19.0 + perk * 7.0)
+	_draw_leaf(leaf_root + Vector2(1, 3), lerpf(-0.75, -0.40, perk) + sway * 0.02, 18.0 + perk * 7.0)
 
-	# Stem & posture: droopy -> perks up with excitement -> tall bloom!
-	var perk := maxf(_bloom_t, _excite_t * 0.65)
-	var droop := 1.0 - perk
-	var sway_spd := 4.4 if is_bloomed else (6.5 if _excite_t > 0.3 else 2.2)
-	var sway := sin(_time * sway_spd) * (3.8 if is_bloomed else (3.5 if _excite_t > 0.3 else 2.6))
-	var head_pos := Vector2(
-		bx + droop * 10.0 + sway,
-		lerpf(-28.0, -52.0, perk)
-	)
-	var stem_mid := Vector2(bx + droop * 12.0 + sway * 0.45, lerpf(-12.0, -26.0, perk))
+	# Pot (drawn over the stem base)
+	_draw_pot()
 
-	var stem_pts := PackedVector2Array([Vector2(bx, 2.0), stem_mid, head_pos])
-	draw_polyline(stem_pts, Color(0.24, 0.60, 0.26), 7.2, true)
-	draw_polyline(stem_pts, Color(0.44, 0.82, 0.40), 3.4, true)
+	# Flower petals
+	if _bloom_t > 0.02:
+		var pr := 13.5 * bloom_e
+		var pd := 19.0 * bloom_e
+		var petal_cols := [Color(1.0, 0.60, 0.68), Color(1.0, 0.76, 0.30)]
+		for layer in range(2):
+			var n := 8
+			for i in range(n):
+				var a := TAU * float(i) / float(n) + _time * 0.35 + float(layer) * (PI / float(n))
+				var dist := pd * (1.0 if layer == 0 else 0.68)
+				var pp := head_pos + Vector2.from_angle(a) * dist
+				var col: Color = petal_cols[layer]
+				var pts := Art.ellipse_points(Vector2.ZERO, pr * (1.0 if layer == 0 else 0.8), pr * 0.62, 16)
+				var rotated := PackedVector2Array()
+				for q in pts:
+					rotated.append(pp + q.rotated(a))
+				draw_colored_polygon(rotated, col.darkened(0.12))
+				var inner := PackedVector2Array()
+				for q in pts:
+					inner.append(pp + (q * 0.78).rotated(a) - Vector2(0, 1))
+				draw_colored_polygon(inner, col)
 
-	# Expressive leaves
-	var leaf_l := lerpf(-2.15, -2.72, perk)
-	var leaf_r := lerpf(-0.42, -0.45, perk)
-	_draw_leaf(stem_mid + Vector2(-2, 2), leaf_l, 17.0 + perk * 6.0)
-	_draw_leaf(stem_mid + Vector2(2, 2), leaf_r, 17.0 + perk * 6.0)
+	# Head bud / flower center
+	var head_r := lerpf(16.0, 17.5, _bloom_t)
+	var bud_top := Color(0.66, 0.90, 0.52).lerp(Color(1.0, 0.92, 0.50), _bloom_t)
+	var bud_bot := Color(0.40, 0.74, 0.36).lerp(Color(0.98, 0.74, 0.26), _bloom_t)
+	if _shiver_timer > 0.0:
+		bud_top = bud_top.lerp(Color(0.80, 0.94, 1.0), 0.5)
+		bud_bot = bud_bot.lerp(Color(0.56, 0.80, 0.94), 0.5)
+	var head := Art.ellipse_points(head_pos, head_r, head_r * 0.94, 28)
+	draw_polygon(head, Art.vgrad_colors(head, bud_top, bud_bot))
+	Art.draw_ellipse(self, head_pos + Vector2(-5.5, -6.0), 5.0, 3.4, Color(1, 1, 1, 0.45))
+	draw_polyline(Art.closed(head), Art.LEAF_DEEP if _bloom_t < 0.5 else Art.SUN_DEEP, 2.2, true)
+	if _bloom_t < 0.5:
+		# little bud tuft
+		draw_colored_polygon(PackedVector2Array([
+			head_pos + Vector2(-4, -head_r + 2), head_pos + Vector2(2 + sway * 0.4, -head_r - 9), head_pos + Vector2(5, -head_r + 3)
+		]), Art.LEAF)
 
-	# Multi-layered flower petals when bloomed
-	if _bloom_t > 0.05:
-		var petal_r := 12.5 * _bloom_t
-		var petal_dist := 18.0 * _bloom_t
-		for i in range(7):
-			var a := TAU * float(i) / 7.0 + _time * 0.45
-			var ppos := head_pos + Vector2.from_angle(a) * petal_dist
-			draw_circle(ppos, petal_r, Color(1.0, 0.78, 0.22))
-			draw_circle(ppos, petal_r * 0.62, Color(1.0, 0.94, 0.66))
-			draw_arc(ppos, petal_r, 0.0, TAU, 16, Color(0.88, 0.56, 0.10, 0.6), 1.5, true)
-
-	# Cute head bud
-	var head_r := lerpf(15.5, 18.0, _bloom_t)
-	var head_col := Color(0.56, 0.82, 0.42).lerp(Color(0.38, 0.84, 0.36), perk)
-	draw_circle(head_pos, head_r, head_col)
-	draw_circle(head_pos + Vector2(-4.5, -5.5), 5.0, Color(0.76, 0.96, 0.66, 0.55))
-	draw_arc(head_pos, head_r, 0.0, TAU, 26, Color(0.20, 0.50, 0.22), 2.2, true)
-
-	# Expressive Face
-	var ink := Color(0.11, 0.26, 0.13)
+	# Face
+	var ink := Color(0.12, 0.26, 0.14)
+	var look := _look_dir * 2.2
 	if is_bloomed:
-		draw_arc(head_pos + Vector2(-5.8, -1.0), 3.4, PI + 0.28, TAU - 0.28, 8, ink, 2.2, true)
-		draw_arc(head_pos + Vector2(5.8, -1.0), 3.4, PI + 0.28, TAU - 0.28, 8, ink, 2.2, true)
-		draw_arc(head_pos + Vector2(0.0, 2.5), 5.2, 0.12, PI - 0.12, 10, ink, 2.2, true)
-		draw_circle(head_pos + Vector2(-9.8, 3.2), 3.2, Color(1.0, 0.54, 0.60, 0.65))
-		draw_circle(head_pos + Vector2(9.8, 3.2), 3.2, Color(1.0, 0.54, 0.60, 0.65))
+		Art.draw_face(self, head_pos + Vector2(0, 1), 0.95, ink, "joy")
 	elif _shiver_timer > 0.0:
-		draw_line(head_pos + Vector2(-7.5, -3), head_pos + Vector2(-3, 0), ink, 2.2)
-		draw_line(head_pos + Vector2(-7.5, 2.5), head_pos + Vector2(-3, 0), ink, 2.2)
-		draw_line(head_pos + Vector2(7.5, -3), head_pos + Vector2(3, 0), ink, 2.2)
-		draw_line(head_pos + Vector2(7.5, 2.5), head_pos + Vector2(3, 0), ink, 2.2)
-		draw_circle(head_pos + Vector2(0, 5.8), 3.0, ink)
+		Art.draw_face(self, head_pos + Vector2(0, 1), 0.9, ink, "wince")
+	elif _excite_t > 0.3:
+		Art.draw_face(self, head_pos + Vector2(0, 1), 0.92, ink, "scared", look, _blinking)
 	else:
-		var eye_off := _look_dir * 2.3
-		var eye_r := 3.1 if _excite_t > 0.25 else 2.6
-		draw_circle(head_pos + Vector2(-5.2, -1.2) + eye_off, eye_r, ink)
-		draw_circle(head_pos + Vector2(5.2, -1.2) + eye_off, eye_r, ink)
-		draw_circle(head_pos + Vector2(-6.0, -2.0) + eye_off, 1.1, Color.WHITE)
-		draw_circle(head_pos + Vector2(4.4, -2.0) + eye_off, 1.1, Color.WHITE)
-		if _excite_t > 0.25:
-			# Excited anticipation smile!
-			draw_circle(head_pos + Vector2(-9.2, 3.0), 3.0, Color(1.0, 0.56, 0.60, 0.55))
-			draw_circle(head_pos + Vector2(9.2, 3.0), 3.0, Color(1.0, 0.56, 0.60, 0.55))
-			draw_arc(head_pos + Vector2(0.0, 2.5), 4.6, 0.15, PI - 0.15, 10, ink, 2.1, true)
-		else:
-			draw_arc(head_pos + Vector2(0.0, 7.6), 3.6, PI + 0.35, TAU - 0.35, 8, ink, 1.9, true)
-			# Floating water-drop thought bubble
-			var bob := sin(_time * 3.0) * 3.2
-			var bpos := head_pos + Vector2(25.0, -25.0 + bob)
-			draw_circle(bpos, 12.2, Color(1.0, 1.0, 1.0, 0.88))
-			draw_arc(bpos, 12.2, 0.0, TAU, 20, Color(0.62, 0.80, 0.68, 0.5), 1.4, true)
-			draw_circle(bpos + Vector2(-10.5, 11.5), 3.4, Color(1.0, 1.0, 1.0, 0.80))
-			draw_circle(bpos + Vector2(0.0, 2.2), 4.8, Color(0.20, 0.72, 0.96))
-			draw_colored_polygon(PackedVector2Array([
-				bpos + Vector2(0.0, -6.2),
-				bpos + Vector2(4.4, 1.2),
-				bpos + Vector2(-4.4, 1.2),
-			]), Color(0.20, 0.72, 0.96))
+		Art.draw_face(self, head_pos + Vector2(0, 1), 0.88, ink, "worried", look, _blinking)
+		# Thirsty thought bubble
+		var bob := sin(_time * 2.6) * 3.0
+		var bpos := head_pos + Vector2(27.0, -27.0 + bob)
+		draw_circle(bpos + Vector2(-11.0, 12.0), 3.0, Color(1, 1, 1, 0.85))
+		draw_circle(bpos + Vector2(-16.0, 18.0), 1.8, Color(1, 1, 1, 0.75))
+		draw_circle(bpos + Vector2(1, 2), 13.0, Color(0.2, 0.3, 0.2, 0.10))
+		draw_circle(bpos, 13.0, Color(1, 1, 1, 0.95))
+		var drop := PackedVector2Array()
+		for i in range(20):
+			var a := TAU * float(i) / 20.0
+			var up := maxf(0.0, -sin(a))
+			drop.append(bpos + Vector2(cos(a) * 5.0 * (1.0 - up * 0.6), sin(a) * 5.0 - up * up * 4.5 + 1.8))
+		draw_colored_polygon(drop, Art.WATER)
+		draw_circle(bpos + Vector2(-1.6, 1.0), 1.3, Color(1, 1, 1, 0.8))
 
-	# Frost puffs when shivering
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 	for f in _frost_puffs:
 		var a: float = clampf(float(f["life"]) / float(f["max_life"]), 0.0, 1.0)
-		draw_circle(f["pos"], float(f["r"]) * a, Color(0.84, 0.97, 1.0, a * 0.85))
+		draw_circle(f["pos"], float(f["r"]) * (1.4 - 0.4 * a), Color(0.84, 0.97, 1.0, a * 0.85))
+		Art.draw_sparkle(self, (f["pos"] as Vector2) + Vector2(5, -4), 4.0 * a, Color(1, 1, 1, a))
 
-	# Confetti shower on bloom
+	for sp in _sparkles:
+		var a: float = clampf(float(sp["life"]) / float(sp["max_life"]), 0.0, 1.0)
+		var p := Vector2(0, -58) + Vector2.from_angle(float(sp["ang"])) * float(sp["dist"])
+		Art.draw_sparkle(self, p, 7.0 * a, Color(1.0, 0.96, 0.7, a))
+
 	for c in _confetti:
 		var a: float = clampf(float(c["life"]) / float(c["max_life"]), 0.0, 1.0)
 		var col: Color = c["color"]
 		col.a = a
-		draw_circle(c["pos"], float(c["size"]) * (0.45 + 0.55 * a), col)
+		var sz := float(c["size"]) * (0.5 + 0.5 * a)
+		var r := float(c["rot"])
+		var p: Vector2 = c["pos"]
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-sz, -sz * 0.45).rotated(r), p + Vector2(sz, -sz * 0.45).rotated(r),
+			p + Vector2(sz, sz * 0.45).rotated(r), p + Vector2(-sz, sz * 0.45).rotated(r),
+		]), col)
+
+
+func _draw_pot() -> void:
+	var body := PackedVector2Array([
+		Vector2(-34, 6), Vector2(34, 6), Vector2(27, 40), Vector2(24, 44),
+		Vector2(-24, 44), Vector2(-27, 40),
+	])
+	draw_polygon(body, Art.vgrad_colors(body, Color(0.92, 0.54, 0.34), Color(0.74, 0.36, 0.22)))
+	draw_colored_polygon(PackedVector2Array([Vector2(-27, 8), Vector2(-15, 8), Vector2(-17, 41), Vector2(-23, 41)]), Color(1.0, 0.76, 0.58, 0.40))
+	# painted heart
+	var hc := Vector2(6, 25)
+	draw_circle(hc + Vector2(-3, -2), 3.6, Color(1.0, 0.86, 0.72, 0.85))
+	draw_circle(hc + Vector2(3, -2), 3.6, Color(1.0, 0.86, 0.72, 0.85))
+	draw_colored_polygon(PackedVector2Array([hc + Vector2(-6.4, -1), hc + Vector2(6.4, -1), hc + Vector2(0, 6)]), Color(1.0, 0.86, 0.72, 0.85))
+	draw_polyline(Art.closed(body), Art.TERRACOTTA_DEEP, 2.4, true)
+	# soil
+	Art.draw_ellipse(self, Vector2(0, 3), 32.0, 6.0, Color(0.34, 0.22, 0.14))
+	if _bloom_t > 0.0 or is_bloomed:
+		Art.draw_ellipse(self, Vector2(0, 3), 28.0, 4.5, Color(0.22, 0.14, 0.10))
+	# rim
+	var rim := Rect2(-41, -4, 82, 14)
+	Art.draw_rrect_grad(self, rim, 5.0, Color(0.98, 0.64, 0.44), Color(0.82, 0.44, 0.28))
+	draw_rect(Rect2(-37, -2, 74, 3), Color(1.0, 0.84, 0.70, 0.7))
+	Art.draw_rrect_outline(self, rim, 5.0, Art.TERRACOTTA_DEEP, 2.4)
 
 
 func _draw_leaf(origin: Vector2, angle: float, length: float) -> void:
 	var dir := Vector2.from_angle(angle)
 	var perp := dir.orthogonal()
-	var tip := origin + dir * length
-	var mid := origin + dir * (length * 0.52)
-	var pts := PackedVector2Array([
-		origin,
-		mid + perp * (length * 0.36),
-		tip,
-		mid - perp * (length * 0.36),
-	])
-	draw_colored_polygon(pts, Color(0.32, 0.74, 0.34))
-	draw_colored_polygon(PackedVector2Array([origin, mid + perp * (length * 0.22), tip]), Color(0.46, 0.84, 0.44, 0.55))
-	draw_line(origin, tip, Color(0.20, 0.52, 0.22), 1.7, true)
+	var pts := PackedVector2Array()
+	for i in range(9):
+		var t := float(i) / 8.0
+		pts.append(origin + dir * (length * t) + perp * sin(t * PI) * length * 0.34)
+	for i in range(7, 0, -1):
+		var t := float(i) / 8.0
+		pts.append(origin + dir * (length * t) - perp * sin(t * PI) * length * 0.30)
+	draw_colored_polygon(pts, Art.LEAF)
+	var hi := PackedVector2Array()
+	for i in range(9):
+		var t := float(i) / 8.0
+		hi.append(origin + dir * (length * t) + perp * sin(t * PI) * length * 0.22)
+	hi.append(origin + dir * length * 0.5)
+	draw_colored_polygon(hi, Color(0.62, 0.90, 0.52, 0.55))
+	draw_polyline(Art.closed(pts), Art.LEAF_DEEP, 1.6, true)
+	draw_line(origin, origin + dir * length * 0.85, Art.LEAF_DEEP, 1.4, true)
+
+
+## Menu showcase: return to the thirsty state.
+func reset_bloom() -> void:
+	is_bloomed = false
+	_bloom_t = 0.0
+	_bloom_delay = -1.0

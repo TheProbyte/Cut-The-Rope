@@ -29,6 +29,7 @@ static func build_level(parent: Node2D, data: Dictionary) -> Dictionary:
 		"glass_panes": [],
 		"moving_platforms": [],
 		"collectibles": [],
+		"spout": null,
 		"theme": theme_name,
 	}
 
@@ -120,6 +121,7 @@ static func build_level(parent: Node2D, data: Dictionary) -> Dictionary:
 	spout.theme_name = theme_name
 	spout.position = Vector2(float(spawn_pos[0]), float(spawn_pos[1]))
 	parent.add_child(spout)
+	result["spout"] = spout
 
 	# Droplet
 	var init_state_str: String = String(spawn_cfg.get("state", "water")).to_lower()

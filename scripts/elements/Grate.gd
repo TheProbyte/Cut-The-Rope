@@ -38,22 +38,25 @@ func configure(cfg: Dictionary) -> void:
 
 func _draw() -> void:
 	var half := Vector2(length * 0.5, thickness * 0.5)
-	# Subtle translucent slot shadow so players see gaps between bars
-	draw_rect(Rect2(-half, Vector2(length, thickness)), Color(0.22, 0.30, 0.28, 0.16))
-
-	# Outer iron/bronze rails (top and bottom thin rims)
-	var rail_col := Color(0.36, 0.44, 0.46)
-	draw_line(Vector2(-half.x, -half.y + 2.0), Vector2(half.x, -half.y + 2.0), rail_col, 3.0, true)
-	draw_line(Vector2(-half.x, half.y - 2.0), Vector2(half.x, half.y - 2.0), rail_col, 3.0, true)
-
-	# Vertical grate bars with clear open slots
-	var spacing := 14.0
-	var x := -half.x + 7.0
-	while x <= half.x - 5.0:
-		draw_line(Vector2(x, -half.y + 1.0), Vector2(x, half.y - 1.0), Color(0.46, 0.56, 0.58), 4.0, true)
-		draw_line(Vector2(x - 1.0, -half.y + 1.0), Vector2(x - 1.0, half.y - 1.0), Color(0.75, 0.84, 0.86, 0.65), 1.2, true)
+	var rect := Rect2(-half, Vector2(length, thickness))
+	var sh := rect
+	sh.position += Vector2(3.0, 6.0).rotated(-rotation)
+	Art.draw_rrect(self, sh, 5.0, Color(0.10, 0.16, 0.12, 0.12))
+	# see-through slot backing
+	Art.draw_rrect(self, rect, 5.0, Color(0.20, 0.28, 0.27, 0.22))
+	# bars
+	var spacing := 13.0
+	var x := -half.x + 9.0
+	while x <= half.x - 8.0:
+		Art.draw_rrect(self, Rect2(Vector2(x - 2.4, -half.y + 2.0), Vector2(4.8, thickness - 4.0)), 2.4, Color(0.42, 0.52, 0.54))
+		draw_line(Vector2(x - 1.0, -half.y + 3.0), Vector2(x - 1.0, half.y - 3.0), Color(0.82, 0.90, 0.92, 0.7), 1.2)
 		x += spacing
-
-	# End brackets
-	draw_rect(Rect2(-half.x, -half.y, 6.0, thickness), Color(0.32, 0.40, 0.42))
-	draw_rect(Rect2(half.x - 6.0, -half.y, 6.0, thickness), Color(0.32, 0.40, 0.42))
+	# rails
+	for ry: float in [-half.y + 2.0, half.y - 2.0]:
+		draw_line(Vector2(-half.x + 4, ry), Vector2(half.x - 4, ry), Color(0.30, 0.38, 0.40), 3.6, true)
+	draw_line(Vector2(-half.x + 4, -half.y + 1.0), Vector2(half.x - 4, -half.y + 1.0), Color(0.80, 0.88, 0.90, 0.6), 1.2)
+	# end brackets
+	for sx: float in [-1.0, 1.0]:
+		var br := Rect2(Vector2(sx * half.x - (8.0 if sx > 0 else 0.0), -half.y - 2.0), Vector2(8.0, thickness + 4.0))
+		Art.draw_rrect(self, br, 3.0, Color(0.32, 0.40, 0.42))
+		draw_circle(br.get_center(), 2.0, Color(0.78, 0.86, 0.88))

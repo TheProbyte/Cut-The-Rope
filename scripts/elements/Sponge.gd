@@ -173,47 +173,35 @@ func _draw() -> void:
 	var h := sponge_size.y * _squish_y
 	var hw := w * 0.5
 	var hh := h * 0.5
-
-	# Tactile tap glow halo when full of water!
+	var rect := Rect2(-hw, -hh, w, h)
 	if wet:
 		var pulse := 0.55 + 0.35 * sin(_time * 5.0)
-		draw_arc(Vector2.ZERO, maxf(hw, hh) + 12.0 + sin(_time * 5.0) * 3.0, 0.0, TAU, 32, Color(0.24, 0.78, 0.98, pulse * 0.65), 3.0, true)
-
-	# Drop shadow
-	draw_rect(Rect2(-hw + 3.0, -hh + 6.0, w, h), Color(0.14, 0.16, 0.10, 0.20))
-
-	# Main golden kitchen sponge body (richer wet amber-aqua tint when soaked)
-	var base_col := Color(0.76, 0.72, 0.26) if wet else Color(0.98, 0.84, 0.30)
-	var hi_col := Color(0.88, 0.88, 0.48, 0.65) if wet else Color(1.0, 0.94, 0.58, 0.75)
-	var rim_col := Color(0.46, 0.42, 0.14) if wet else Color(0.68, 0.50, 0.12)
-	draw_rect(Rect2(-hw, -hh, w, h), base_col)
-
-	# Scouring green top pad strip (classic cozy kitchen sponge!)
-	var pad_h := h * 0.24
-	draw_rect(Rect2(-hw, -hh, w, pad_h), Color(0.28, 0.66, 0.34) if wet else Color(0.36, 0.74, 0.38))
-	draw_rect(Rect2(-hw + 3.0, -hh + pad_h + 2.0, w - 6.0, h * 0.20), hi_col)
-
-	# Cute sponge pores
-	var pore_col := Color(0.22, 0.64, 0.84, 0.55) if wet else Color(0.84, 0.64, 0.16, 0.55)
+		Art.draw_glow(self, Vector2.ZERO, maxf(hw, hh) * 1.9, Color(0.30, 0.80, 1.0, 0.35 * pulse))
+		Art.draw_rrect_outline(self, rect.grow(10.0 + sin(_time * 5.0) * 3.0), 16.0, Color(0.24, 0.78, 0.98, pulse * 0.7), 3.0)
+	Art.draw_rrect(self, Rect2(rect.position + Vector2(3.0, 6.0).rotated(-rotation), rect.size), 10.0, Color(0.14, 0.16, 0.10, 0.18))
+	var top := Color(0.82, 0.84, 0.46) if wet else Color(1.0, 0.90, 0.42)
+	var bot := Color(0.58, 0.66, 0.30) if wet else Color(0.94, 0.72, 0.22)
+	Art.draw_rrect_grad(self, rect, 10.0, top, bot)
+	# green scrubber pad
+	var pad := Rect2(-hw, -hh, w, h * 0.30)
+	Art.draw_rrect_grad(self, pad, 8.0, Color(0.46, 0.80, 0.46), Color(0.28, 0.62, 0.34))
+	draw_rect(Rect2(-hw + 4.0, -hh + h * 0.30 - 2.0, w - 8.0, 3.0), Color(0.20, 0.44, 0.22, 0.4))
+	# pores
+	var pore_col := Color(0.18, 0.58, 0.82, 0.6) if wet else Color(0.80, 0.58, 0.12, 0.55)
 	for p in _pores:
-		var pos := Vector2((p["pos"] as Vector2).x * _squish_x, (p["pos"] as Vector2).y * _squish_y)
-		draw_circle(pos, float(p["r"]), pore_col)
-
-	draw_rect(Rect2(-hw, -hh, w, h), rim_col, false, 2.4)
-
-	# Animated water drip bead & downward arrow cue when soaked
+		var pos := Vector2((p["pos"] as Vector2).x * _squish_x, (p["pos"] as Vector2).y * _squish_y + 2.0)
+		Art.draw_ellipse(self, pos, float(p["r"]), float(p["r"]) * 0.8, pore_col, 12)
+	Art.draw_rrect_outline(self, rect, 10.0, Color(0.40, 0.40, 0.14) if wet else Color(0.62, 0.44, 0.10), 2.4)
 	if wet:
+		# cute face: the sponge is holding its breath
+		Art.draw_face(self, Vector2(0, h * 0.12), 0.75, Color(0.22, 0.26, 0.10), "determined")
 		var dir := release_dir.rotated(-rotation).normalized()
-		var drip_start := dir * (hh + 3.0)
-		var drip_pos := drip_start + dir * _drip_y
+		var drip_pos := dir * (hh + 3.0) + dir * _drip_y
 		var drip_alpha := 1.0 - (_drip_y / 26.0)
-		draw_circle(drip_pos, 4.5, Color(0.24, 0.78, 0.98, drip_alpha))
-		# Subtle tap hint chevron
-		var tip := dir * (hh + 15.0)
+		Art.draw_ellipse(self, drip_pos, 3.6, 4.8, Color(0.24, 0.78, 0.98, drip_alpha), 12)
+		var tip := dir * (hh + 17.0)
 		var perp := dir.orthogonal() * 7.0
-		draw_polyline(PackedVector2Array([tip - dir * 6.0 - perp, tip, tip - dir * 6.0 + perp]), Color(0.20, 0.72, 0.94, 0.85), 2.5, true)
-
-	# Release splash particles
+		draw_polyline(PackedVector2Array([tip - dir * 6.0 - perp, tip, tip - dir * 6.0 + perp]), Color(0.20, 0.72, 0.94, 0.9), 3.0, true)
 	for s in _splashes:
 		var a: float = clampf(float(s["life"]) / float(s["max_life"]), 0.0, 1.0)
-		draw_circle(s["pos"], float(s["r"]) * a, Color(0.30, 0.82, 1.0, a))
+		Art.draw_ellipse(self, s["pos"], float(s["r"]) * a * 0.85, float(s["r"]) * a * 1.1, Color(0.30, 0.82, 1.0, a), 10)

@@ -2,7 +2,7 @@
   "id": "greenhouse_01",
   "world": "greenhouse",
   "title": "Morning Dew",
-  "hint": "Tap anywhere to switch states: Water -> Ice -> Steam. Smash the glass as Ice, then water the seedling!",
+  "hint": "Tap anywhere to switch Water, Ice, Steam. Smash the glass as Ice, then melt back to Water for the seedling!",
   "spawn": { "pos": [155, 200], "state": "water" },
   "seedling": { "pos": [340, 1020] },
   "collectibles": [

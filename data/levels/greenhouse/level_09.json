@@ -2,7 +2,7 @@
   "id": "greenhouse_09",
   "world": "greenhouse",
   "title": "Thermal Cycle",
-  "hint": "Ride the Heat Lamp -> Cold Pipe -> Freezer Zone chain, then melt to Water in the pot!",
+  "hint": "Ride the chain: Heat Lamp, Cold Pipe, Freezer Zone. Then melt to Water over the pot!",
   "spawn": { "pos": [115, 200], "state": "water" },
   "seedling": { "pos": [330, 1015] },
   "collectibles": [

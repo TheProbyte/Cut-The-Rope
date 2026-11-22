@@ -82,3 +82,47 @@ func get_level_meta(world_id: String, index: int) -> Dictionary:
 
 func get_level_count(world_id: String) -> int:
 	return get_world_levels(world_id).size()
+
+
+func get_world(world_id: String) -> Dictionary:
+	for w in _worlds:
+		if String(w.get("id", "")) == world_id:
+			return w
+	return {}
+
+
+func get_world_index(world_id: String) -> int:
+	for i in range(_worlds.size()):
+		if String(_worlds[i].get("id", "")) == world_id:
+			return i
+	return -1
+
+
+## Global 1-based level number across all worlds (Greenhouse 1-10, Kitchen 11-20, ...).
+func get_display_number(world_id: String, index: int) -> int:
+	var offset := 0
+	for w in _worlds:
+		var wid := String(w.get("id", ""))
+		if wid == world_id:
+			break
+		offset += get_level_count(wid)
+	return offset + index + 1
+
+
+## Returns {"world": id, "index": i} for the level after the given one, or {} at the very end.
+func get_next_level(world_id: String, index: int) -> Dictionary:
+	if index + 1 < get_level_count(world_id):
+		return {"world": world_id, "index": index + 1}
+	var wi := get_world_index(world_id)
+	for j in range(wi + 1, _worlds.size()):
+		var wid := String(_worlds[j].get("id", ""))
+		if get_level_count(wid) > 0:
+			return {"world": wid, "index": 0}
+	return {}
+
+
+func get_total_level_count() -> int:
+	var n := 0
+	for w in _worlds:
+		n += get_level_count(String(w.get("id", "")))
+	return n

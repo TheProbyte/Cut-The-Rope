@@ -93,12 +93,23 @@ jobs:
           export/android/debug_keystore_pass = "android"
           EOF
 
-      - name: Import resources and export Android debug APK
+      - name: Import resources
         run: |
           export PATH="/home/runner/.local/bin:$PATH"
           godot4 --version
           godot4 --headless --import --quit
-          OUT_APK="build/drip-v0.2-build${GITHUB_RUN_NUMBER}.apk"
+
+      - name: Solve all levels and smoke-test the game flow
+        run: |
+          export PATH="/home/runner/.local/bin:$PATH"
+          godot4 --headless --fixed-fps 60 res://tests/VerifyLevels.tscn
+          godot4 --headless --fixed-fps 60 res://tests/FlowTest.tscn
+
+      - name: Export Android debug APK
+        run: |
+          export PATH="/home/runner/.local/bin:$PATH"
+          APP_VERSION="$(sed -n 's/^version\/name="\(.*\)"/\1/p' export_presets.cfg)"
+          OUT_APK="build/drip-v${APP_VERSION}-build${GITHUB_RUN_NUMBER}.apk"
           godot4 --headless --export-debug "Android" "$OUT_APK"
           SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           APKSIGNER="$(ls -d "${SDK_PATH}"/build-tools/*/apksigner | sort -V | tail -n 1)"

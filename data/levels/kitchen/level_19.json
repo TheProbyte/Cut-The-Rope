@@ -3,7 +3,7 @@
   "world": "kitchen",
   "theme": "kitchen",
   "title": "Chef's Contraption",
-  "hint": "Heat Lamp -> Cold Pipe -> Sponge 1 -> Sliding Tray -> Sponge 2 -> Freezer smash!",
+  "hint": "Heat Lamp, Cold Pipe, Sponge, sliding tray, Sponge again... then a Freezer smash!",
   "spawn": { "pos": [115, 195], "state": "water" },
   "seedling": { "pos": [225, 1005] },
   "collectibles": [

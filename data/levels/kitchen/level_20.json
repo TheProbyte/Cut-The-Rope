@@ -3,7 +3,7 @@
   "world": "kitchen",
   "theme": "kitchen",
   "title": "Grand Kitchen Finale",
-  "hint": "Every skill together: cross Sponge 1 as Ice, smash glass, ride Heat & Fan to the Cold Pipe, then ferry to bloom!",
+  "hint": "Everything at once: cross the first Sponge as Ice, smash glass, ride Heat and Fan to the Cold Pipe, then ferry home!",
   "spawn": { "pos": [108, 185], "state": "water" },
   "seedling": { "pos": [468, 932] },
   "collectibles": [

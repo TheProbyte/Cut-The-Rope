@@ -1,258 +1,276 @@
 class_name MainMenu
 extends Node2D
+## Title screen: animated logo, living character showcase, play/continue.
 
-signal play_pressed
+signal play_pressed(from_pos: Vector2)
 signal levels_pressed
+
+var first_boot: bool = false
 
 var _music_btn: Button
 var _sfx_btn: Button
-var _hero: Node2D
+var _play_btn: Button
+var _hero: MenuHero
+var _logo: Logo
 
 
-class MenuHero extends Node2D:
-	var _time: float = 0.0
-	var _demo_state: int = 0
-	var _state_timer: float = 0.0
-	var _morph_pop: float = 1.0
+class Logo extends Control:
+	var t: float = 0.0
+	var drop_in: float = 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _process(delta: float) -> void:
-		_time += delta
-		_state_timer += delta
-		_morph_pop = lerpf(_morph_pop, 1.0, clampf(delta * 9.0, 0.0, 1.0))
-		if _state_timer > 2.3:
-			_state_timer = 0.0
-			_demo_state = (_demo_state + 1) % 3
-			_morph_pop = 1.28
+		t += delta
 		queue_redraw()
 
 	func _draw() -> void:
-		# Cozy greenhouse cedar shelf with little sprouting leaves
-		var shelf := Rect2(124, 560, 472, 28)
-		draw_rect(Rect2(128, 568, 472, 28), Color(0.10, 0.20, 0.12, 0.20))
-		draw_rect(shelf, Color(0.70, 0.50, 0.30))
-		draw_rect(Rect2(124, 560, 472, 10), Color(0.86, 0.68, 0.46, 0.72))
-		draw_rect(shelf, Color(0.42, 0.26, 0.14), false, 2.5)
-		draw_circle(Vector2(142, 574), 4.0, Color(0.90, 0.74, 0.42))
-		draw_circle(Vector2(578, 574), 4.0, Color(0.90, 0.74, 0.42))
+		var f := UIThemeHelper.get_display_font()
+		if f == null:
+			return
+		var letters := ["D", "R", "I", "P"]
+		var cols := [Color(0.16, 0.62, 0.92), Color(0.36, 0.78, 0.98), Color(0.64, 0.86, 0.98), Color(0.16, 0.62, 0.92)]
+		var fs := 150
+		var widths: Array[float] = []
+		var total := 0.0
+		for l in letters:
+			var w := f.get_string_size(l, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			widths.append(w)
+			total += w + 6.0
+		var x := size.x * 0.5 - total * 0.5
+		var base_y := size.y * 0.5 + fs * 0.36
+		for i in range(letters.size()):
+			var delay := float(i) * 0.09
+			var e := clampf((drop_in - delay) / 0.5, 0.0, 1.0)
+			var fall := (1.0 - Seedling._elastic(e)) * -220.0
+			var bob := sin(t * 2.2 + float(i) * 0.9) * 6.0
+			var p := Vector2(x, base_y + bob + fall)
+			var a := clampf(e * 3.0, 0.0, 1.0)
+			draw_string_outline(f, p + Vector2(0, 10), letters[i], HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 26, Color(0.10, 0.28, 0.20, 0.22 * a))
+			draw_string_outline(f, p, letters[i], HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 26, Color(1, 1, 1, a))
+			draw_string_outline(f, p, letters[i], HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 9, Color(0.06, 0.34, 0.58, a))
+			draw_string(f, p, letters[i], HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(cols[i], a))
+			# glossy highlight dot on each letter
+			draw_circle(p + Vector2(widths[i] * 0.3, -fs * 0.56), 6.0, Color(1, 1, 1, 0.7 * a))
+			x += widths[i] + 6.0
+		# droplet dripping off the P
+		var drip_cycle := fmod(t, 3.2)
+		if drop_in > 0.8 and drip_cycle < 1.2:
+			var px := x - widths[3] * 0.55
+			var py := base_y + 10.0
+			var grow := clampf(drip_cycle / 0.7, 0.0, 1.0)
+			var fall_t := clampf((drip_cycle - 0.7) / 0.5, 0.0, 1.0)
+			var dp := Vector2(px, py + fall_t * fall_t * 120.0)
+			Art.draw_ellipse(self, dp, 6.0 * grow, 8.0 * grow, Color(0.30, 0.74, 0.98, 1.0 - fall_t))
 
-		# Cute eye-tracking blooming seedling on right side of shelf
-		var bob := sin(_time * 3.4) * 14.0
-		var dp := Vector2(252, 466 + bob)
-		var sp := Vector2(468, 518)
-		var pot := PackedVector2Array([
-			sp + Vector2(-36, 4), sp + Vector2(36, 4),
-			sp + Vector2(28, 44), sp + Vector2(-28, 44),
-		])
-		draw_colored_polygon(pot, Color(0.82, 0.44, 0.27))
-		draw_colored_polygon(PackedVector2Array([
-			sp + Vector2(-28, 6), sp + Vector2(-12, 6),
-			sp + Vector2(-15, 42), sp + Vector2(-24, 42),
-		]), Color(0.94, 0.64, 0.46, 0.40))
-		draw_rect(Rect2(sp + Vector2(-41, -3), Vector2(82, 13)), Color(0.89, 0.52, 0.34))
-		draw_rect(Rect2(sp + Vector2(-41, -3), Vector2(82, 13)), Color(0.52, 0.24, 0.14), false, 2.2)
 
-		var sway := sin(_time * 2.8) * 5.0
-		var head := sp + Vector2(sway, -48)
-		draw_polyline(PackedVector2Array([sp + Vector2(0, 2), sp + Vector2(sway * 0.5, -22), head]), Color(0.28, 0.66, 0.30), 7.0, true)
-		draw_circle(head, 48.0, Color(1.0, 0.90, 0.40, 0.18))
-		for i in range(7):
-			var a := TAU * float(i) / 7.0 + _time * 0.45
-			var ppos := head + Vector2.from_angle(a) * 18.0
-			draw_circle(ppos, 11.5, Color(1.0, 0.80, 0.24))
-			draw_circle(ppos, 7.0, Color(1.0, 0.94, 0.66))
-		draw_circle(head, 17.5, Color(0.42, 0.84, 0.38))
-		draw_arc(head, 17.5, 0.0, TAU, 24, Color(0.20, 0.50, 0.22), 2.0, true)
-		var look := (dp - head).normalized() * 2.2
-		draw_circle(head + Vector2(-5.5, -1.5) + look, 2.8, Color(0.11, 0.26, 0.13))
-		draw_circle(head + Vector2(5.5, -1.5) + look, 2.8, Color(0.11, 0.26, 0.13))
-		draw_circle(head + Vector2(-6.3, -2.3) + look, 1.0, Color.WHITE)
-		draw_circle(head + Vector2(4.7, -2.3) + look, 1.0, Color.WHITE)
-		draw_arc(head + Vector2(0, 2.5), 4.8, 0.2, PI - 0.2, 8, Color(0.11, 0.26, 0.13), 2.1, true)
-		draw_circle(head + Vector2(-9.5, 3.0), 3.0, Color(1.0, 0.56, 0.60, 0.6))
-		draw_circle(head + Vector2(9.5, 3.0), 3.0, Color(1.0, 0.56, 0.60, 0.6))
+class MenuHero extends Node2D:
+	var art := DropletArt.new()
+	var seedling: Seedling
+	var t: float = 0.0
+	var phase_t: float = 0.0
+	var step: int = 0
+	var hop: float = 0.0
+	var drop_pos := Vector2(250, 668)
 
-		# Animated morphing hero droplet on left side
-		draw_circle(Vector2(252, 554), 30.0 - bob * 0.3, Color(0.10, 0.20, 0.14, 0.16))
-		var sc := _morph_pop
-		match _demo_state:
-			0:
-				draw_circle(dp, 46.0 * sc, Color(0.32, 0.84, 1.0, 0.16))
-				var r := 36.0 * sc
-				var pts := PackedVector2Array()
-				for i in range(30):
-					var a := TAU * float(i) / 30.0
-					var ca := cos(a)
-					var sa := sin(a)
-					var taper := 1.0 - maxf(0.0, -sa) * 0.19
-					var lift := maxf(0.0, -sa) * 10.5 * sc
-					pts.append(dp + Vector2(ca * r * taper, sa * r - lift))
-				draw_colored_polygon(pts, Color(0.14, 0.64, 0.92))
-				draw_circle(dp + Vector2(0, 14) * sc, 14.0 * sc, Color(0.76, 0.96, 1.0, 0.42))
-				draw_circle(dp + Vector2(-12, -14) * sc, 8.0 * sc, Color(1, 1, 1, 0.72))
-				draw_circle(dp + Vector2(-10, 2), 4.2, Color(0.08, 0.22, 0.34))
-				draw_circle(dp + Vector2(10, 2), 4.2, Color(0.08, 0.22, 0.34))
-				draw_circle(dp + Vector2(-11.3, 0.6), 1.5, Color.WHITE)
-				draw_circle(dp + Vector2(8.7, 0.6), 1.5, Color.WHITE)
-				draw_arc(dp + Vector2(0, 8), 6.2, 0.2, PI - 0.2, 10, Color(0.08, 0.22, 0.34), 2.5, true)
-			1:
-				var s := 35.0 * sc
-				var c := 9.5 * sc
-				var cube := PackedVector2Array([
-					dp + Vector2(-s + c, -s), dp + Vector2(s - c, -s),
-					dp + Vector2(s, -s + c), dp + Vector2(s, s - c),
-					dp + Vector2(s - c, s), dp + Vector2(-s + c, s),
-					dp + Vector2(-s, s - c), dp + Vector2(-s, -s + c),
-				])
-				draw_colored_polygon(cube, Color(0.70, 0.94, 1.0))
-				draw_colored_polygon(PackedVector2Array([
-					dp + Vector2(-s + c, -s), dp + Vector2(s * 0.4, -s),
-					dp + Vector2(-s, s * 0.4), dp + Vector2(-s, -s + c),
-				]), Color(1, 1, 1, 0.45))
-				var border := cube.duplicate()
-				border.append(cube[0])
-				draw_polyline(border, Color(0.30, 0.66, 0.88), 3.4, true)
-				draw_circle(dp + Vector2(-10, 0), 4.2, Color(0.08, 0.26, 0.40))
-				draw_circle(dp + Vector2(10, 0), 4.2, Color(0.08, 0.26, 0.40))
-				draw_line(dp + Vector2(-5, 9), dp + Vector2(5, 9), Color(0.08, 0.26, 0.40), 2.6, true)
-			2:
-				var puffs := [
-					[Vector2(-23, 5), 23.0], [Vector2(23, 5), 23.0],
-					[Vector2(-13, -15), 25.0], [Vector2(14, -13), 23.0],
-					[Vector2(0, 8), 26.0],
-				]
-				for pf in puffs:
-					draw_circle(dp + (pf[0] as Vector2) * sc, float(pf[1]) * sc, Color(0.97, 0.99, 1.0, 0.94))
-				draw_arc(dp + Vector2(-10, 2), 5.6, PI + 0.3, TAU - 0.3, 8, Color(0.26, 0.40, 0.48), 2.6, true)
-				draw_arc(dp + Vector2(10, 2), 5.6, PI + 0.3, TAU - 0.3, 8, Color(0.26, 0.40, 0.48), 2.6, true)
-				draw_arc(dp + Vector2(0, 8), 5.2, 0.2, PI - 0.2, 8, Color(0.26, 0.40, 0.48), 2.3, true)
+	func _ready() -> void:
+		art.size = 1.9
+		seedling = load("res://scenes/entities/Seedling.tscn").instantiate()
+		seedling.position = Vector2(470, 700)
+		seedling.scale = Vector2(1.45, 1.45)
+		add_child(seedling)
+
+	func _process(delta: float) -> void:
+		t += delta
+		phase_t += delta
+		art.advance(delta)
+		art.squish = lerpf(art.squish, 0.0, clampf(delta * 8.0, 0.0, 1.0))
+		art.pop = lerpf(art.pop, 1.0, clampf(delta * 8.0, 0.0, 1.0))
+		# Little hop every beat
+		hop = absf(sin(t * 2.6)) * 22.0 if art.state != 2 else 30.0 + sin(t * 2.0) * 8.0
+		if art.state == 1:
+			hop *= 0.4
+		if phase_t > 2.1:
+			phase_t = 0.0
+			step += 1
+			var nxt := (art.state + 1) % 3
+			art.start_morph(art.state, nxt)
+			art.pop = 1.25
+			art.squish = 0.25
+			if nxt == 0 and step % 3 == 0:
+				seedling.play_bloom()
+			elif nxt == 1 and seedling.is_bloomed:
+				seedling.reset_bloom()
+		var dp := drop_pos + Vector2(0, -hop)
+		seedling.look_target = to_global(dp)
+		seedling.excite_override = 0.8 if art.state == 0 else 0.0
+		queue_redraw()
+
+	func _draw() -> void:
+		# Cedar shelf with brackets and little decor
+		var shelf := Rect2(110, 744, 500, 26)
+		Art.draw_rrect(self, Rect2(shelf.position + Vector2(4, 10), shelf.size), 8.0, Color(0.10, 0.18, 0.10, 0.18))
+		Art.draw_rrect_grad(self, shelf, 8.0, Color(0.86, 0.66, 0.44), Color(0.64, 0.44, 0.26))
+		Art.draw_rrect(self, Rect2(shelf.position + Vector2(4, 3), Vector2(shelf.size.x - 8, 7)), 4.0, Color(1, 0.92, 0.74, 0.5))
+		Art.draw_rrect_outline(self, shelf, 8.0, Color(0.42, 0.26, 0.13), 2.6)
+		for bx in [150.0, 570.0]:
+			draw_colored_polygon(PackedVector2Array([Vector2(bx - 8, 770), Vector2(bx + 8, 770), Vector2(bx + 8, 820), Vector2(bx - 8, 790)]), Color(0.52, 0.36, 0.22))
+		# droplet shadow + droplet
+		var dp := drop_pos + Vector2(0, -hop)
+		var sh := clampf(1.0 - hop / 60.0, 0.4, 1.0)
+		Art.draw_ellipse(self, Vector2(drop_pos.x, 744), 34.0 * sh, 7.0 * sh, Color(0.10, 0.18, 0.10, 0.20))
+		art.velocity = Vector2(0, cos(t * 2.6) * 120.0) if art.state == 0 else Vector2.ZERO
+		art.draw(self, dp)
 
 
 func _ready() -> void:
-	add_child(GreenhouseBackground.new())
+	var cam := Camera2D.new()
+	cam.position = Vector2(360, 640)
+	add_child(cam)
+	cam.make_current()
+	var bg := WorldBackground.new()
+	add_child(bg)
 	_hero = MenuHero.new()
 	add_child(_hero)
 	_build_ui()
+	AudioManager.play_music("menu")
 
 
 func _build_ui() -> void:
 	var ui := CanvasLayer.new()
+	ui.layer = 6
 	add_child(ui)
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ui.add_child(root)
 
-	var title_box := VBoxContainer.new()
-	title_box.position = Vector2(60, 130)
-	title_box.size = Vector2(600, 195)
-	title_box.add_theme_constant_override("separation", 4)
-	ui.add_child(title_box)
+	# 720x1280 design frame centered in the viewport (matches the camera).
+	var frame := Control.new()
+	frame.set_anchors_preset(Control.PRESET_CENTER)
+	frame.offset_left = -360
+	frame.offset_right = 360
+	frame.offset_top = -640
+	frame.offset_bottom = 640
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(frame)
 
-	var title := Label.new()
-	title.text = "DRIP"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UIThemeHelper.apply_display_font(title, 118, Color(0.13, 0.54, 0.78))
-	title.add_theme_color_override("font_outline_color", Color(1.0, 1.0, 1.0, 0.92))
-	title.add_theme_constant_override("outline_size", 12)
-	title.add_theme_color_override("font_shadow_color", Color(0.10, 0.24, 0.18, 0.26))
-	title.add_theme_constant_override("shadow_offset_y", 8)
-	title_box.add_child(title)
+	_logo = Logo.new()
+	_logo.position = Vector2(0, 150)
+	_logo.size = Vector2(720, 200)
+	frame.add_child(_logo)
+	var tw := _logo.create_tween()
+	tw.tween_interval(0.15 if first_boot else 0.05)
+	tw.tween_property(_logo, "drop_in", 1.5, 1.4)
 
-	var tagline := Label.new()
-	tagline.text = "Water  •  Ice  •  Steam"
-	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UIThemeHelper.apply_display_font(tagline, 28, Color(0.24, 0.44, 0.32))
-	title_box.add_child(tagline)
+	var tagline := HBoxContainer.new()
+	tagline.alignment = BoxContainer.ALIGNMENT_CENTER
+	tagline.position = Vector2(0, 360)
+	tagline.size = Vector2(720, 50)
+	tagline.add_theme_constant_override("separation", 10)
+	frame.add_child(tagline)
+	var names := ["Water", "Ice", "Steam"]
+	for i in range(3):
+		var l := UIThemeHelper.make_label(names[i], 30, Art.state_color(i).darkened(0.35))
+		l.add_theme_color_override("font_outline_color", Color(1, 1, 1, 0.9))
+		l.add_theme_constant_override("outline_size", 8)
+		tagline.add_child(l)
+		if i < 2:
+			var dot := UIThemeHelper.make_label("·", 30, Color(0.40, 0.54, 0.46))
+			tagline.add_child(dot)
+	UIThemeHelper.pop_in(tagline, 0.9 if first_boot else 0.4)
 
-	var btn_box := VBoxContainer.new()
-	btn_box.position = Vector2(142, 668)
-	btn_box.size = Vector2(436, 360)
-	btn_box.add_theme_constant_override("separation", 20)
-	ui.add_child(btn_box)
+	var col := VBoxContainer.new()
+	col.position = Vector2(130, 870)
+	col.size = Vector2(460, 300)
+	col.add_theme_constant_override("separation", 18)
+	frame.add_child(col)
 
-	var play_btn := Button.new()
-	play_btn.text = "PLAY"
-	play_btn.custom_minimum_size = Vector2(0, 86)
-	UIThemeHelper.style_button(play_btn, Color(0.26, 0.72, 0.44), Color(0.33, 0.78, 0.50), Color(0.20, 0.60, 0.36), Color.WHITE, 38, 26)
-	play_btn.pressed.connect(func():
+	var nxt := SaveManager.get_next_unfinished()
+	var started := SaveManager.get_total_stars().x > 0 or not nxt.is_empty() and (String(nxt["world"]) != String(LevelRegistry.get_worlds()[0].get("id", "")) or int(nxt["index"]) > 0)
+	_play_btn = Button.new()
+	_play_btn.text = "CONTINUE" if started and not nxt.is_empty() else "PLAY"
+	_play_btn.custom_minimum_size = Vector2(0, 104)
+	UIThemeHelper.style_primary(_play_btn, UIThemeHelper.C_GREEN, 44, 34)
+	_play_btn.pressed.connect(func():
 		AudioManager.play_sfx("ui_tap")
-		play_pressed.emit()
+		play_pressed.emit(_play_btn.get_global_rect().get_center())
 	)
-	btn_box.add_child(play_btn)
+	col.add_child(_play_btn)
+	if not nxt.is_empty() and started:
+		var sub := UIThemeHelper.make_label("Level %d · %s" % [
+			LevelRegistry.get_display_number(String(nxt["world"]), int(nxt["index"])),
+			String(LevelRegistry.get_level_meta(String(nxt["world"]), int(nxt["index"])).get("title", ""))], 19, Color(1, 1, 1, 0.9))
+		sub.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		sub.offset_top = -34
+		sub.offset_bottom = -10
+		_play_btn.add_child(sub)
+		_play_btn.add_theme_constant_override("h_separation", 0)
+		var ps := _play_btn.get_theme_stylebox("normal").duplicate() as StyleBoxFlat
+		ps.content_margin_bottom = 40
+		_play_btn.add_theme_stylebox_override("normal", ps)
+		var ph := _play_btn.get_theme_stylebox("hover").duplicate() as StyleBoxFlat
+		ph.content_margin_bottom = 40
+		_play_btn.add_theme_stylebox_override("hover", ph)
 
 	var levels_btn := Button.new()
-	levels_btn.text = "SELECT WORLD & LEVEL"
-	levels_btn.custom_minimum_size = Vector2(0, 70)
-	UIThemeHelper.style_button(levels_btn, Color(0.18, 0.64, 0.86), Color(0.24, 0.70, 0.92), Color(0.14, 0.54, 0.74), Color.WHITE, 25, 22)
+	levels_btn.text = "LEVELS"
+	levels_btn.custom_minimum_size = Vector2(0, 78)
+	UIThemeHelper.style_primary(levels_btn, UIThemeHelper.C_BLUE, 30, 28)
 	levels_btn.pressed.connect(func():
 		AudioManager.play_sfx("ui_tap")
 		levels_pressed.emit()
 	)
-	btn_box.add_child(levels_btn)
+	col.add_child(levels_btn)
 
-	var audio_row := HBoxContainer.new()
-	audio_row.add_theme_constant_override("separation", 16)
-	btn_box.add_child(audio_row)
+	var stars := SaveManager.get_total_stars()
+	var pill := PanelContainer.new()
+	pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	pill.add_theme_stylebox_override("panel", UIThemeHelper.make_panel_style(Color(1.0, 0.985, 0.95, 0.92), Color(0.84, 0.88, 0.80), 22, 0, 4))
+	col.add_child(pill)
+	var prow := HBoxContainer.new()
+	prow.add_theme_constant_override("separation", 8)
+	pill.add_child(prow)
+	var sun := UIIcon.new()
+	sun.kind = "star"
+	sun.shadow = false
+	sun.custom_minimum_size = Vector2(36, 36)
+	prow.add_child(sun)
+	prow.add_child(UIThemeHelper.make_label("%d / %d" % [stars.x, stars.y], 24))
+	prow.add_child(UIThemeHelper.make_label("  ·  %d levels" % LevelRegistry.get_total_level_count(), 20, Color(0.44, 0.56, 0.48), false))
 
-	_music_btn = Button.new()
-	_music_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_music_btn.custom_minimum_size = Vector2(0, 58)
+	var d := 1.0 if first_boot else 0.3
+	UIThemeHelper.pop_in(_play_btn, d)
+	UIThemeHelper.pop_in(levels_btn, d + 0.1)
+	UIThemeHelper.pop_in(pill, d + 0.2)
+
+	# Top-right audio toggles hug the real top edge.
+	var toggles := HBoxContainer.new()
+	toggles.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	toggles.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	toggles.offset_left = -170
+	toggles.offset_right = -20
+	toggles.offset_top = UIThemeHelper.safe_top(get_viewport()) + 20
+	toggles.add_theme_constant_override("separation", 12)
+	root.add_child(toggles)
+	_music_btn = UIThemeHelper.make_icon_button("music", UIThemeHelper.C_SAGE, 64)
 	_music_btn.pressed.connect(func():
 		AudioManager.toggle_music()
 		AudioManager.play_sfx("ui_tap")
 		_refresh_audio_buttons()
 	)
-	audio_row.add_child(_music_btn)
-
-	_sfx_btn = Button.new()
-	_sfx_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_sfx_btn.custom_minimum_size = Vector2(0, 58)
+	toggles.add_child(_music_btn)
+	_sfx_btn = UIThemeHelper.make_icon_button("sfx", UIThemeHelper.C_SAGE, 64)
 	_sfx_btn.pressed.connect(func():
 		AudioManager.toggle_sfx()
 		AudioManager.play_sfx("ui_tap")
 		_refresh_audio_buttons()
 	)
-	audio_row.add_child(_sfx_btn)
-
-	var stars_info := SaveManager.get_total_stars()
-	var pill := PanelContainer.new()
-	pill.position = Vector2(150, 1134)
-	pill.size = Vector2(420, 58)
-	pill.add_theme_stylebox_override("panel", UIThemeHelper.make_panel_style(
-		Color(0.99, 0.98, 0.94, 0.92),
-		Color(0.56, 0.74, 0.58),
-		22,
-		2,
-		4
-	))
-	ui.add_child(pill)
-
-	var footer := Label.new()
-	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	footer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	footer.text = "2 Worlds • 20 Levels   ★ %d / %d" % [stars_info.x, stars_info.y]
-	UIThemeHelper.apply_display_font(footer, 22, Color(0.22, 0.40, 0.28))
-	pill.add_child(footer)
-
+	toggles.add_child(_sfx_btn)
 	_refresh_audio_buttons()
 
 
 func _refresh_audio_buttons() -> void:
-	var m_on := SaveManager.is_music_enabled()
-	_music_btn.text = "MUSIC: ON" if m_on else "MUSIC: OFF"
-	UIThemeHelper.style_button(
-		_music_btn,
-		Color(0.42, 0.66, 0.52) if m_on else Color(0.64, 0.70, 0.66),
-		Color(0.48, 0.72, 0.58) if m_on else Color(0.70, 0.76, 0.72),
-		Color(0.34, 0.56, 0.44),
-		Color.WHITE,
-		21,
-		18
-	)
-	var s_on := SaveManager.is_sfx_enabled()
-	_sfx_btn.text = "SFX: ON" if s_on else "SFX: OFF"
-	UIThemeHelper.style_button(
-		_sfx_btn,
-		Color(0.42, 0.66, 0.52) if s_on else Color(0.64, 0.70, 0.66),
-		Color(0.48, 0.72, 0.58) if s_on else Color(0.70, 0.76, 0.72),
-		Color(0.34, 0.56, 0.44),
-		Color.WHITE,
-		21,
-		18
-	)
+	PauseModal._set_toggle(_music_btn, "music", SaveManager.is_music_enabled())
+	PauseModal._set_toggle(_sfx_btn, "sfx", SaveManager.is_sfx_enabled())

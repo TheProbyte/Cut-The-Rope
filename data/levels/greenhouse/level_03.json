@@ -2,7 +2,7 @@
   "id": "greenhouse_03",
   "world": "greenhouse",
   "title": "Through the Grate",
-  "hint": "Ice slides across grates while Water slips right through! Float left as Steam for the bonus sun.",
+  "hint": "Ice slides over grates while Water slips through. Float left as Steam for the bonus sun!",
   "spawn": { "pos": [115, 210], "state": "water" },
   "seedling": { "pos": [365, 1015] },
   "collectibles": [

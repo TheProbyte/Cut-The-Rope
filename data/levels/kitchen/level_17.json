@@ -3,7 +3,7 @@
   "world": "kitchen",
   "theme": "kitchen",
   "title": "Drafty Stove",
-  "hint": "Blow Steam over the Hot Plates into the Freezer Zone—Ice will smash the glass straight down!",
+  "hint": "Blow Steam over the Hot Plates into the Freezer Zone. The Ice will smash straight down!",
   "spawn": { "pos": [145, 855], "state": "water" },
   "seedling": { "pos": [545, 965] },
   "collectibles": [

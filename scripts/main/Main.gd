@@ -1,4 +1,6 @@
 extends Node
+## Root screen router: main menu <-> level select <-> level player,
+## with liquid iris transitions and Android back-button handling.
 
 const MAIN_MENU_SCENE := preload("res://scenes/main/MainMenu.tscn")
 const LEVEL_SELECT_SCENE := preload("res://scenes/main/LevelSelect.tscn")
@@ -11,16 +13,20 @@ var _transition: TransitionLayer
 
 
 func _ready() -> void:
+	get_tree().set_auto_accept_quit(true)
+	get_tree().set_quit_on_go_back(false)
 	_transition = TransitionLayer.new()
 	add_child(_transition)
-	_mount_main_menu()
+	_mount_main_menu(true)
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if _transition.is_busy():
+			return
 		match _screen_name:
 			"level_player":
-				show_level_select(_last_world)
+				(_current_screen as LevelPlayer).handle_back()
 			"level_select":
 				show_main_menu()
 			_:
@@ -37,48 +43,48 @@ func _swap_screen(node: Node, screen_name: String) -> void:
 	add_child(_current_screen)
 
 
-func _mount_main_menu() -> void:
+func _mount_main_menu(first_boot: bool = false) -> void:
 	var menu: MainMenu = MAIN_MENU_SCENE.instantiate()
+	menu.first_boot = first_boot
 	menu.play_pressed.connect(_on_quick_play)
 	menu.levels_pressed.connect(func(): show_level_select(_last_world))
 	_swap_screen(menu, "main_menu")
+	AudioManager.play_music("menu")
 
 
 func show_main_menu() -> void:
-	_transition.transition_to(_mount_main_menu, Color(0.18, 0.56, 0.72, 1.0))
+	AudioManager.play_sfx("ui_whoosh", 0.9, -6.0)
+	TransitionLayer.run(_mount_main_menu, WorldBackground.curtain_color("greenhouse"))
 
 
 func show_level_select(world_id: String = "greenhouse") -> void:
 	_last_world = world_id
-	var curtain := Color(0.18, 0.56, 0.72, 1.0) if world_id == "greenhouse" else Color(0.76, 0.48, 0.26, 1.0)
-	_transition.transition_to(func():
+	AudioManager.play_sfx("ui_whoosh", 1.0, -6.0)
+	TransitionLayer.run(func():
 		var sel: LevelSelect = LEVEL_SELECT_SCENE.instantiate()
 		sel.active_world = world_id
 		sel.level_selected.connect(start_level)
 		sel.back_pressed.connect(show_main_menu)
 		_swap_screen(sel, "level_select")
-	, curtain)
+		AudioManager.play_music("menu")
+	, WorldBackground.curtain_color(world_id))
 
 
-func start_level(world_id: String, level_index: int) -> void:
+func start_level(world_id: String, level_index: int, from_pos: Vector2 = Vector2(-1, -1)) -> void:
 	_last_world = world_id
-	var curtain := Color(0.16, 0.54, 0.72, 1.0) if world_id == "greenhouse" else Color(0.76, 0.48, 0.26, 1.0)
-	_transition.transition_to(func():
+	AudioManager.play_sfx("ui_whoosh", 1.1, -6.0)
+	TransitionLayer.run(func():
 		var player: LevelPlayer = LEVEL_PLAYER_SCENE.instantiate()
 		player.world_id = world_id
 		player.level_index = level_index
 		player.back_to_level_select.connect(func(wid: String): show_level_select(wid))
 		_swap_screen(player, "level_player")
-	, curtain)
+	, WorldBackground.curtain_color(world_id), from_pos)
 
 
-func _on_quick_play() -> void:
-	for w in LevelRegistry.get_worlds():
-		var wid := String(w.get("id", "greenhouse"))
-		var levels := LevelRegistry.get_world_levels(wid)
-		for i in range(levels.size()):
-			var lvl_id := String(levels[i].get("id", ""))
-			if not SaveManager.is_completed(lvl_id):
-				start_level(wid, i)
-				return
-	start_level("greenhouse", 0)
+func _on_quick_play(from_pos: Vector2) -> void:
+	var nxt := SaveManager.get_next_unfinished()
+	if nxt.is_empty():
+		show_level_select(_last_world)
+	else:
+		start_level(String(nxt["world"]), int(nxt["index"]), from_pos)

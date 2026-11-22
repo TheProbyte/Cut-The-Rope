@@ -26,17 +26,22 @@ class TrayVisual extends Node2D:
 	func _draw() -> void:
 		var half := Vector2(length * 0.5, thickness * 0.5)
 		var rect := Rect2(-half, Vector2(length, thickness))
-		draw_rect(Rect2(-half + Vector2(3, 6), Vector2(length, thickness)), Color(0.12, 0.16, 0.12, 0.20))
-
-		var base := Color(0.84, 0.62, 0.36) if theme_name == "kitchen" else Color(0.68, 0.52, 0.32)
-		draw_rect(rect, base)
-		draw_rect(Rect2(-half, Vector2(length, thickness * 0.36)), Color(0.96, 0.82, 0.58, 0.72))
-		draw_rect(Rect2(-half.x, half.y - thickness * 0.25, length, thickness * 0.25), Color(0.56, 0.38, 0.18, 0.55))
-		draw_rect(rect, Color(0.44, 0.28, 0.14), false, 2.4)
-
-		draw_circle(Vector2(-half.x + 16.0, 0.0), 4.5, Color(0.86, 0.66, 0.34))
-		draw_circle(Vector2(half.x - 16.0, 0.0), 4.5, Color(0.86, 0.66, 0.34))
-		draw_circle(Vector2(0.0, 0.0), 4.2, Color(0.28, 0.68, 0.60))
+		var rad := minf(thickness * 0.45, 9.0)
+		Art.draw_rrect(self, Rect2(rect.position + Vector2(3, 7), rect.size), rad, Color(0.12, 0.16, 0.12, 0.2))
+		var top := Color(0.95, 0.76, 0.50) if theme_name == "kitchen" else Color(0.82, 0.64, 0.42)
+		var bot := Color(0.76, 0.52, 0.30) if theme_name == "kitchen" else Color(0.60, 0.44, 0.26)
+		Art.draw_rrect_grad(self, rect, rad, top, bot)
+		Art.draw_rrect(self, Rect2(rect.position + Vector2(4, 2), Vector2(length - 8, thickness * 0.3)), rad * 0.6, Color(1, 0.94, 0.78, 0.5))
+		# tray lip handles
+		for sx: float in [-1.0, 1.0]:
+			var hx := sx * (half.x - 14.0)
+			Art.draw_ellipse(self, Vector2(hx, 1.0), 7.0, 3.0, Color(0.46, 0.28, 0.14, 0.55), 12)
+		Art.draw_rrect_outline(self, rect, rad, Color(0.44, 0.26, 0.12), 2.4)
+		# little wheels
+		for sx: float in [-1.0, 1.0]:
+			var wp := Vector2(sx * (half.x - 22.0), half.y + 3.0)
+			draw_circle(wp, 5.0, Color(0.36, 0.36, 0.40))
+			draw_circle(wp, 2.0, Color(0.80, 0.80, 0.84))
 
 
 func configure(cfg: Dictionary, p_theme: String = "kitchen") -> void:
@@ -130,12 +135,13 @@ func _draw() -> void:
 	var dist := diff.length()
 	if dist > 4.0:
 		var dir := diff / dist
-		draw_line(point_a, point_b, Color(0.42, 0.34, 0.26, 0.26), 5.0, true)
-		var d := 8.0
-		while d < dist - 8.0:
-			var p1 := point_a + dir * d
-			var p2 := point_a + dir * minf(d + 10.0, dist - 8.0)
-			draw_line(p1, p2, Color(0.86, 0.72, 0.44, 0.65), 2.2, true)
-			d += 20.0
-	draw_circle(point_a, 6.0, Color(0.68, 0.50, 0.30, 0.75))
-	draw_circle(point_b, 6.0, Color(0.68, 0.50, 0.30, 0.75))
+		var off := Vector2(0, thickness * 0.5 + 9.0)
+		draw_line(point_a + off, point_b + off, Color(0.30, 0.26, 0.22, 0.22), 8.0, true)
+		draw_line(point_a + off, point_b + off, Color(0.62, 0.52, 0.40, 0.45), 4.0, true)
+		var d := 10.0
+		while d < dist - 10.0:
+			draw_circle(point_a + off + dir * d, 1.8, Color(1.0, 0.94, 0.80, 0.7))
+			d += 18.0
+		for p in [point_a + off, point_b + off]:
+			draw_circle(p, 7.0, Color(0.46, 0.36, 0.26, 0.85))
+			draw_circle(p, 3.0, Color(0.92, 0.82, 0.62))

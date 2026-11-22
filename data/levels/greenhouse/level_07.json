@@ -2,7 +2,7 @@
   "id": "greenhouse_07",
   "world": "greenhouse",
   "title": "Cold Pipe",
-  "hint": "Cold pipes instantly condense Steam back into crisp Water droplets!",
+  "hint": "Cold pipes condense Steam straight back into Water.",
   "spawn": { "pos": [150, 855], "state": "water" },
   "seedling": { "pos": [545, 965] },
   "collectibles": [

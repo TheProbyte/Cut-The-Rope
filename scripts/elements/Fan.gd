@@ -99,74 +99,71 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	# Wind tunnel visuals
 	var half_w := wind_width * 0.5
-	var tunnel := Rect2(24.0, -half_w, wind_range, wind_width)
-	if is_on:
-		draw_rect(tunnel, Color(0.84, 0.97, 1.0, 0.14))
-		# Flowing animated wind ribbons
-		for row in range(3):
-			var y := lerpf(-half_w * 0.62, half_w * 0.62, float(row) / 2.0)
-			var phase := fmod(_time * 210.0 + float(row) * 95.0, wind_range)
-			var seg_len := 52.0
+	var x0 := 24.0
+	var x1 := 24.0 + wind_range
+	var on_t := clampf(_blade_speed / 15.0, 0.0, 1.0)
+	# wind tunnel
+	if on_t > 0.02:
+		draw_polygon(PackedVector2Array([Vector2(x0, -half_w), Vector2(x1, -half_w), Vector2(x1, half_w), Vector2(x0, half_w)]),
+			PackedColorArray([Color(0.84, 0.97, 1.0, 0.22 * on_t), Color(0.84, 0.97, 1.0, 0.0), Color(0.84, 0.97, 1.0, 0.0), Color(0.84, 0.97, 1.0, 0.22 * on_t)]))
+		for row in range(4):
+			var y := lerpf(-half_w * 0.7, half_w * 0.7, float(row) / 3.0)
 			for rep in range(2):
-				var sx := 28.0 + fmod(phase + float(rep) * (wind_range * 0.5), wind_range)
-				var ex := minf(24.0 + wind_range - 6.0, sx + seg_len)
-				if ex > sx + 8.0:
-					var fade := 1.0 - ((sx - 24.0) / wind_range) * 0.55
-					var wave := sin(_time * 7.0 + float(row) * 2.1) * 4.0
-					draw_line(
-						Vector2(sx, y + wave),
-						Vector2(ex, y - wave),
-						Color(0.92, 0.99, 1.0, 0.65 * fade),
-						2.6,
-						true
-					)
-	else:
-		# Subtle dotted outline so player can preview fan direction even when OFF
-		draw_rect(tunnel, Color(0.55, 0.68, 0.66, 0.06))
-		var dx := 34.0
-		while dx < 24.0 + wind_range - 12.0:
-			draw_line(Vector2(dx, -half_w), Vector2(minf(dx + 12.0, 24.0 + wind_range), -half_w), Color(0.45, 0.58, 0.54, 0.28), 1.6)
-			draw_line(Vector2(dx, half_w), Vector2(minf(dx + 12.0, 24.0 + wind_range), half_w), Color(0.45, 0.58, 0.54, 0.28), 1.6)
+				var head := x0 + fmod(_time * 230.0 + float(row) * 77.0 + float(rep) * wind_range * 0.5, wind_range)
+				var seg := 60.0
+				var pts := PackedVector2Array()
+				for i in range(7):
+					var px := head - seg + seg * float(i) / 6.0
+					if px < x0:
+						continue
+					pts.append(Vector2(px, y + sin(px * 0.045 + _time * 6.0 + float(row)) * 5.0))
+				if pts.size() >= 2:
+					var fade := 1.0 - (head - x0) / wind_range
+					draw_polyline(pts, Color(1.0, 1.0, 1.0, 0.75 * fade * on_t), 2.6, true)
+					draw_circle(pts[pts.size() - 1], 2.0, Color(1, 1, 1, 0.8 * fade * on_t))
+	if on_t < 0.98:
+		var off_a := 1.0 - on_t
+		var dx := x0 + 10.0
+		while dx < x1 - 12.0:
+			draw_line(Vector2(dx, -half_w), Vector2(minf(dx + 12.0, x1), -half_w), Color(0.40, 0.54, 0.50, 0.32 * off_a), 2.0, true)
+			draw_line(Vector2(dx, half_w), Vector2(minf(dx + 12.0, x1), half_w), Color(0.40, 0.54, 0.50, 0.32 * off_a), 2.0, true)
 			dx += 24.0
+		# direction preview chevrons
+		for i in range(3):
+			var cx := x0 + 36.0 + float(i) * 22.0
+			draw_polyline(PackedVector2Array([Vector2(cx - 6, -9), Vector2(cx + 3, 0), Vector2(cx - 6, 9)]), Color(0.40, 0.54, 0.50, 0.38 * off_a), 3.0, true)
 
-	# Tactile tap indicator ring around fan housing
-	var ring_col := Color(0.32, 0.80, 0.68, 0.45) if is_on else Color(0.55, 0.62, 0.58, 0.32)
-	var ring_r := (34.0 + sin(_time * 3.5) * 2.0) * _pop
-	draw_arc(Vector2.ZERO, ring_r, 0.0, TAU, 28, ring_col, 2.5, true)
+	# tap ring
+	var ring_col := Color(0.32, 0.82, 0.62, 0.55) if is_on else Color(1.0, 1.0, 1.0, 0.65)
+	var ring_r := (36.0 + sin(_time * 3.2) * 2.5) * _pop
+	draw_arc(Vector2.ZERO, ring_r, 0.0, TAU, 36, ring_col, 3.0, true)
 
-	# Fan shadow
-	draw_circle(Vector2(3.0, 4.0), 27.0 * _pop, Color(0.10, 0.18, 0.14, 0.20))
-
-	# Nozzle cone pointing right (local +X)
-	var nozzle := PackedVector2Array([
-		Vector2(6.0, -24.0) * _pop,
-		Vector2(28.0, -30.0) * _pop,
-		Vector2(28.0, 30.0) * _pop,
-		Vector2(6.0, 24.0) * _pop,
-	])
-	draw_colored_polygon(nozzle, Color(0.44, 0.54, 0.52))
-	draw_polyline(nozzle, Color(0.24, 0.34, 0.32), 2.0, true)
-
-	# Circular brass/sage housing
-	var housing_col := Color(0.30, 0.66, 0.58) if is_on else Color(0.56, 0.60, 0.58)
-	draw_circle(Vector2.ZERO, 26.0 * _pop, housing_col)
-	draw_circle(Vector2.ZERO, 20.0 * _pop, Color(0.88, 0.95, 0.92))
-
-	# Spinning blades inside housing
+	var p := _pop
+	Art.draw_ellipse(self, Vector2(3.0, 6.0).rotated(-rotation), 28.0 * p, 28.0 * p, Color(0.10, 0.18, 0.14, 0.20))
+	# nozzle
+	var nozzle := PackedVector2Array([Vector2(6, -22) * p, Vector2(30, -31) * p, Vector2(30, 31) * p, Vector2(6, 22) * p])
+	draw_polygon(nozzle, Art.vgrad_colors(nozzle, Color(0.62, 0.72, 0.70), Color(0.36, 0.46, 0.44)))
+	draw_polyline(Art.closed(nozzle), Color(0.20, 0.30, 0.28), 2.2, true)
+	# housing
+	var housing := Color(0.30, 0.70, 0.58) if is_on else Color(0.58, 0.64, 0.62)
+	var hpts := Art.ellipse_points(Vector2.ZERO, 27.0 * p, 27.0 * p, 32)
+	draw_polygon(hpts, Art.vgrad_colors(hpts, housing.lightened(0.18), housing.darkened(0.15)))
+	draw_circle(Vector2.ZERO, 20.5 * p, Color(0.90, 0.96, 0.94))
+	if on_t > 0.5:
+		draw_circle(Vector2.ZERO, 18.0 * p, Color(0.62, 0.80, 0.76, 0.35 * on_t))
 	for i in range(4):
 		var a := _blade_angle + float(i) * (PI * 0.5)
-		var tip := Vector2.from_angle(a) * (16.5 * _pop)
-		var perp := Vector2.from_angle(a + PI * 0.5) * (4.5 * _pop)
-		draw_colored_polygon(PackedVector2Array([
-			Vector2.ZERO,
-			tip * 0.55 + perp,
-			tip,
-			tip * 0.55 - perp,
-		]), Color(0.28, 0.56, 0.52) if is_on else Color(0.52, 0.58, 0.56))
-
-	# Center brass hub & status dot
-	draw_circle(Vector2.ZERO, 7.0 * _pop, Color(0.82, 0.66, 0.34))
-	draw_circle(Vector2.ZERO, 3.6 * _pop, Color(0.42, 0.96, 0.62) if is_on else Color(0.84, 0.42, 0.38))
-	draw_arc(Vector2.ZERO, 26.0 * _pop, 0.0, TAU, 28, Color(0.22, 0.34, 0.30), 2.4, true)
+		var tip := Vector2.from_angle(a) * (17.0 * p)
+		var perp := Vector2.from_angle(a + PI * 0.5) * (5.5 * p)
+		draw_colored_polygon(PackedVector2Array([Vector2.ZERO, tip * 0.5 + perp, tip, tip * 0.55 - perp * 0.4]),
+			Color(0.24, 0.54, 0.50, 1.0 - on_t * 0.5) if is_on else Color(0.50, 0.56, 0.54))
+	draw_circle(Vector2.ZERO, 7.0 * p, Color(0.86, 0.70, 0.38))
+	draw_circle(Vector2(-1.5, -1.5) * p, 2.4 * p, Color(1.0, 0.92, 0.70))
+	draw_polyline(Art.closed(hpts), Color(0.18, 0.30, 0.26), 2.4, true)
+	# status LED
+	var led := Vector2(-16.0, -16.0) * p
+	draw_circle(led, 4.2 * p, Color(0.20, 0.26, 0.24))
+	draw_circle(led, 3.0 * p, Color(0.42, 0.98, 0.62) if is_on else Color(0.96, 0.44, 0.38))
+	if is_on:
+		Art.draw_glow(self, led, 10.0, Color(0.42, 0.98, 0.62, 0.6))
