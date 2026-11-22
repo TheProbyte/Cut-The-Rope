@@ -1,0 +1,32 @@
+{
+  "id": "greenhouse_04",
+  "world": "greenhouse",
+  "title": "Warm Glow",
+  "hint": "Heat lamps automatically turn the droplet into rising Steam!",
+  "spawn": { "pos": [125, 225], "state": "water" },
+  "seedling": { "pos": [525, 975] },
+  "collectibles": [
+    { "pos": [295, 345] },
+    { "pos": [445, 252] },
+    { "pos": [525, 625] }
+  ],
+  "platforms": [
+    { "from": [65, 290], "to": [270, 385], "thickness": 22, "style": "wood" },
+    { "from": [215, 625], "to": [370, 625], "thickness": 22, "style": "wood" },
+    { "from": [390, 445], "to": [390, 1085], "thickness": 24, "style": "stone" },
+    { "from": [180, 262], "to": [595, 188], "thickness": 22, "style": "roof" },
+    { "from": [435, 1023], "to": [610, 1023], "thickness": 24, "style": "wood" },
+    { "from": [610, 1088], "to": [700, 1088], "thickness": 20, "style": "stone" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [
+    { "pos": [295, 495], "size": [132, 240] }
+  ],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "drains": [
+    { "pos": [655, 1068], "width": 80 }
+  ]
+}

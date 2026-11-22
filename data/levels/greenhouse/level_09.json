@@ -1,0 +1,41 @@
+{
+  "id": "greenhouse_09",
+  "world": "greenhouse",
+  "title": "Thermal Cycle",
+  "hint": "Ride the Heat Lamp -> Cold Pipe -> Freezer Zone chain, then melt to Water in the pot!",
+  "spawn": { "pos": [115, 200], "state": "water" },
+  "seedling": { "pos": [330, 1015] },
+  "collectibles": [
+    { "pos": [375, 240] },
+    { "pos": [555, 470] },
+    { "pos": [330, 895] }
+  ],
+  "platforms": [
+    { "from": [65, 265], "to": [240, 345], "thickness": 22, "style": "wood" },
+    { "from": [185, 575], "to": [345, 575], "thickness": 22, "style": "wood" },
+    { "from": [175, 220], "to": [515, 165], "thickness": 22, "style": "roof" },
+    { "from": [475, 355], "to": [475, 500], "thickness": 20, "style": "stone" },
+    { "from": [635, 205], "to": [635, 610], "thickness": 20, "style": "stone" },
+    { "from": [635, 585], "to": [370, 680], "thickness": 22, "style": "wood" },
+    { "from": [240, 645], "to": [240, 835], "thickness": 20, "style": "stone" },
+    { "from": [420, 705], "to": [420, 835], "thickness": 20, "style": "stone" },
+    { "from": [235, 1063], "to": [425, 1063], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [485, 405], "to": [625, 405], "thickness": 16 }
+  ],
+  "glass_panes": [
+    { "from": [250, 818], "to": [410, 818], "thickness": 14 }
+  ],
+  "heat_lamps": [
+    { "pos": [265, 455], "size": [132, 228] }
+  ],
+  "freezer_zones": [
+    { "pos": [330, 735], "size": [146, 134] }
+  ],
+  "fans": [],
+  "cold_pipes": [
+    { "from": [530, 215], "to": [625, 215], "radius": 16 }
+  ],
+  "drains": []
+}

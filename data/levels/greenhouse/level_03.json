@@ -1,0 +1,37 @@
+{
+  "id": "greenhouse_03",
+  "world": "greenhouse",
+  "title": "Through the Grate",
+  "hint": "Ice slides across grates while Water slips right through! Float left as Steam for the bonus sun.",
+  "spawn": { "pos": [115, 210], "state": "water" },
+  "seedling": { "pos": [365, 1015] },
+  "collectibles": [
+    { "pos": [275, 286] },
+    { "pos": [575, 515] },
+    { "pos": [195, 692] }
+  ],
+  "platforms": [
+    { "from": [60, 275], "to": [215, 307], "thickness": 20, "style": "wood" },
+    { "from": [335, 332], "to": [465, 359], "thickness": 20, "style": "wood" },
+    { "from": [605, 388], "to": [660, 400], "thickness": 20, "style": "wood" },
+    { "from": [210, 622], "to": [340, 622], "thickness": 20, "style": "stone" },
+    { "from": [650, 470], "to": [650, 665], "thickness": 20, "style": "wood" },
+    { "from": [650, 650], "to": [415, 845], "thickness": 22, "style": "wood" },
+    { "from": [105, 805], "to": [315, 920], "thickness": 22, "style": "wood" },
+    { "from": [105, 680], "to": [105, 815], "thickness": 20, "style": "wood" },
+    { "from": [355, 695], "to": [145, 645], "thickness": 18, "style": "roof" },
+    { "from": [265, 1063], "to": [465, 1063], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [215, 307], "to": [335, 332], "thickness": 16 },
+    { "from": [465, 359], "to": [605, 388], "thickness": 16 }
+  ],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "drains": [
+    { "pos": [275, 602], "width": 98 }
+  ]
+}

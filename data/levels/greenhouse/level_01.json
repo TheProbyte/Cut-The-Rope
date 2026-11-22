@@ -1,0 +1,30 @@
+{
+  "id": "greenhouse_01",
+  "world": "greenhouse",
+  "title": "Morning Dew",
+  "hint": "Tap anywhere to switch states: Water -> Ice -> Steam. Smash the glass as Ice, then water the seedling!",
+  "spawn": { "pos": [155, 200], "state": "water" },
+  "seedling": { "pos": [340, 1020] },
+  "collectibles": [
+    { "pos": [310, 312] },
+    { "pos": [515, 445] },
+    { "pos": [340, 885] }
+  ],
+  "platforms": [
+    { "from": [80, 265], "to": [465, 388], "thickness": 22, "style": "wood" },
+    { "from": [615, 480], "to": [368, 610], "thickness": 22, "style": "wood" },
+    { "from": [624, 405], "to": [624, 495], "thickness": 20, "style": "wood" },
+    { "from": [235, 620], "to": [235, 795], "thickness": 20, "style": "wood" },
+    { "from": [445, 660], "to": [445, 795], "thickness": 20, "style": "wood" },
+    { "from": [210, 1068], "to": [470, 1068], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [
+    { "from": [245, 782], "to": [435, 782], "thickness": 14 }
+  ],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "drains": []
+}

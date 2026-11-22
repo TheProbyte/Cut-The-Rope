@@ -1,0 +1,50 @@
+{
+  "id": "greenhouse_10",
+  "world": "greenhouse",
+  "title": "Glasshouse Finale",
+  "hint": "Combine everything: cross the grate & smash glass as Ice, ride the Heat Lamp & Fan to the Cold Pipe!",
+  "spawn": { "pos": [110, 185], "state": "water" },
+  "seedling": { "pos": [430, 1015] },
+  "collectibles": [
+    { "pos": [270, 272] },
+    { "pos": [345, 660] },
+    { "pos": [172, 780] }
+  ],
+  "platforms": [
+    { "from": [60, 240], "to": [210, 286], "thickness": 20, "style": "wood" },
+    { "from": [330, 323], "to": [455, 361], "thickness": 20, "style": "wood" },
+    { "from": [205, 462], "to": [335, 462], "thickness": 18, "style": "stone" },
+    { "from": [452, 375], "to": [452, 445], "thickness": 18, "style": "stone" },
+    { "from": [592, 315], "to": [592, 445], "thickness": 18, "style": "stone" },
+    { "from": [445, 815], "to": [625, 815], "thickness": 22, "style": "wood" },
+    { "from": [665, 475], "to": [665, 820], "thickness": 20, "style": "stone" },
+    { "from": [95, 520], "to": [455, 520], "thickness": 20, "style": "roof" },
+    { "from": [95, 520], "to": [95, 885], "thickness": 20, "style": "stone" },
+    { "from": [95, 872], "to": [365, 965], "thickness": 22, "style": "wood" },
+    { "from": [340, 1063], "to": [520, 1063], "thickness": 24, "style": "wood" },
+    { "from": [540, 1072], "to": [680, 1072], "thickness": 20, "style": "stone" }
+  ],
+  "grates": [
+    { "from": [210, 286], "to": [330, 323], "thickness": 16 },
+    { "from": [105, 705], "to": [240, 705], "thickness": 16 }
+  ],
+  "glass_panes": [
+    { "from": [460, 428], "to": [584, 428], "thickness": 14 }
+  ],
+  "heat_lamps": [
+    { "pos": [522, 705], "size": [140, 200] }
+  ],
+  "freezer_zones": [
+    { "pos": [522, 360], "size": [120, 90] }
+  ],
+  "fans": [
+    { "pos": [625, 588], "direction": "left", "range": 485, "width": 135, "strength": 560, "initially_on": false }
+  ],
+  "cold_pipes": [
+    { "from": [108, 542], "to": [182, 542], "radius": 16 }
+  ],
+  "drains": [
+    { "pos": [270, 442], "width": 98 },
+    { "pos": [610, 1052], "width": 100 }
+  ]
+}

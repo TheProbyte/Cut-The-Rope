@@ -1,0 +1,37 @@
+{
+  "id": "greenhouse_08",
+  "world": "greenhouse",
+  "title": "Crosswinds",
+  "hint": "Coordinate both Fans to guide Steam up the right shaft and back left over the seedling!",
+  "spawn": { "pos": [155, 920], "state": "water" },
+  "seedling": { "pos": [185, 635] },
+  "collectibles": [
+    { "pos": [355, 845] },
+    { "pos": [555, 540] },
+    { "pos": [185, 425] }
+  ],
+  "platforms": [
+    { "from": [85, 985], "to": [645, 985], "thickness": 22, "style": "wood" },
+    { "from": [85, 235], "to": [85, 990], "thickness": 22, "style": "stone" },
+    { "from": [645, 235], "to": [645, 990], "thickness": 22, "style": "stone" },
+    { "from": [85, 235], "to": [645, 235], "thickness": 22, "style": "roof" },
+    { "from": [85, 735], "to": [465, 735], "thickness": 22, "style": "stone" },
+    { "from": [95, 683], "to": [275, 683], "thickness": 22, "style": "wood" },
+    { "from": [275, 465], "to": [275, 735], "thickness": 22, "style": "stone" },
+    { "from": [465, 465], "to": [465, 735], "thickness": 22, "style": "stone" }
+  ],
+  "grates": [
+    { "from": [95, 520], "to": [265, 520], "thickness": 16 }
+  ],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [
+    { "pos": [125, 845], "direction": "right", "range": 465, "width": 140, "strength": 530, "initially_on": false },
+    { "pos": [605, 335], "direction": "left", "range": 470, "width": 145, "strength": 540, "initially_on": false }
+  ],
+  "cold_pipes": [],
+  "drains": [
+    { "pos": [370, 712], "width": 136 }
+  ]
+}

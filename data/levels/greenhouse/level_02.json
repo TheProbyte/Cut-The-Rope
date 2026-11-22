@@ -1,0 +1,31 @@
+{
+  "id": "greenhouse_02",
+  "world": "greenhouse",
+  "title": "Rising Mist",
+  "hint": "Switch to Steam to float up and glide along the sloped glass roof, then switch to Water to drop down!",
+  "spawn": { "pos": [165, 855], "state": "water" },
+  "seedling": { "pos": [510, 960] },
+  "collectibles": [
+    { "pos": [165, 560] },
+    { "pos": [415, 280] },
+    { "pos": [510, 595] }
+  ],
+  "platforms": [
+    { "from": [85, 920], "to": [250, 920], "thickness": 22, "style": "wood" },
+    { "from": [85, 825], "to": [85, 925], "thickness": 20, "style": "wood" },
+    { "from": [250, 845], "to": [250, 925], "thickness": 20, "style": "wood" },
+    { "from": [350, 395], "to": [350, 1080], "thickness": 24, "style": "stone" },
+    { "from": [85, 305], "to": [585, 200], "thickness": 22, "style": "roof" },
+    { "from": [415, 1008], "to": [595, 1008], "thickness": 24, "style": "wood" },
+    { "from": [595, 1088], "to": [700, 1088], "thickness": 20, "style": "stone" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "drains": [
+    { "pos": [648, 1068], "width": 84 }
+  ]
+}

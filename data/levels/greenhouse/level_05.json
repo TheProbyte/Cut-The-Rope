@@ -1,0 +1,41 @@
+{
+  "id": "greenhouse_05",
+  "world": "greenhouse",
+  "title": "Frost Pocket",
+  "hint": "Freezer zones snap your droplet into heavy Ice—perfect for smashing glass and crossing grates!",
+  "spawn": { "pos": [140, 855], "state": "water" },
+  "seedling": { "pos": [600, 965] },
+  "collectibles": [
+    { "pos": [140, 560] },
+    { "pos": [355, 470] },
+    { "pos": [445, 735] }
+  ],
+  "platforms": [
+    { "from": [75, 915], "to": [210, 915], "thickness": 22, "style": "wood" },
+    { "from": [75, 825], "to": [75, 920], "thickness": 20, "style": "wood" },
+    { "from": [210, 835], "to": [210, 920], "thickness": 20, "style": "wood" },
+    { "from": [75, 265], "to": [445, 195], "thickness": 22, "style": "roof" },
+    { "from": [265, 395], "to": [265, 610], "thickness": 22, "style": "stone" },
+    { "from": [495, 395], "to": [495, 610], "thickness": 22, "style": "stone" },
+    { "from": [285, 718], "to": [385, 750], "thickness": 20, "style": "wood" },
+    { "from": [505, 788], "to": [585, 814], "thickness": 20, "style": "wood" },
+    { "from": [375, 1025], "to": [515, 1025], "thickness": 20, "style": "stone" },
+    { "from": [520, 1013], "to": [680, 1013], "thickness": 24, "style": "wood" },
+    { "from": [676, 800], "to": [676, 1015], "thickness": 20, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [385, 750], "to": [505, 788], "thickness": 16 }
+  ],
+  "glass_panes": [
+    { "from": [278, 575], "to": [482, 575], "thickness": 14 }
+  ],
+  "heat_lamps": [],
+  "freezer_zones": [
+    { "pos": [395, 310], "size": [146, 150] }
+  ],
+  "fans": [],
+  "cold_pipes": [],
+  "drains": [
+    { "pos": [445, 1005], "width": 100 }
+  ]
+}

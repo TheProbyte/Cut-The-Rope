@@ -1,0 +1,34 @@
+{
+  "id": "greenhouse_06",
+  "world": "greenhouse",
+  "title": "Gentle Breeze",
+  "hint": "Tap the Fan to turn it ON or OFF! Blow Steam across the gap, then drop as Water.",
+  "spawn": { "pos": [155, 855], "state": "water" },
+  "seedling": { "pos": [560, 965] },
+  "collectibles": [
+    { "pos": [155, 580] },
+    { "pos": [365, 330] },
+    { "pos": [560, 620] }
+  ],
+  "platforms": [
+    { "from": [85, 915], "to": [225, 915], "thickness": 22, "style": "wood" },
+    { "from": [85, 250], "to": [85, 920], "thickness": 22, "style": "stone" },
+    { "from": [225, 445], "to": [225, 1080], "thickness": 22, "style": "stone" },
+    { "from": [85, 250], "to": [655, 250], "thickness": 22, "style": "roof" },
+    { "from": [655, 250], "to": [655, 1015], "thickness": 22, "style": "stone" },
+    { "from": [465, 470], "to": [465, 1080], "thickness": 22, "style": "stone" },
+    { "from": [235, 1045], "to": [455, 1045], "thickness": 20, "style": "stone" },
+    { "from": [475, 1013], "to": [655, 1013], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [
+    { "pos": [125, 335], "direction": "right", "range": 480, "width": 135, "strength": 520, "initially_on": false }
+  ],
+  "cold_pipes": [],
+  "drains": [
+    { "pos": [345, 1025], "width": 130 }
+  ]
+}

@@ -1,0 +1,245 @@
+class_name LevelPlayer
+extends Node2D
+
+signal back_to_level_select
+
+const HUD_SCENE := preload("res://scenes/ui/HUD.tscn")
+const PAUSE_SCENE := preload("res://scenes/ui/PauseModal.tscn")
+const RESULT_SCENE := preload("res://scenes/ui/ResultModal.tscn")
+
+var world_id: String = "greenhouse"
+var level_index: int = 0
+
+var _level_data: Dictionary = {}
+var _playfield: Node2D
+var _droplet: Droplet
+var _seedling: Seedling
+var _fans: Array = []
+var _stars_collected: int = 0
+var _finished: bool = false
+var _hud: HUD
+var _pause_modal: PauseModal
+var _result_modal: ResultModal
+var _tap_ripples: Array[Dictionary] = []
+
+
+func _ready() -> void:
+	var bg := GreenhouseBackground.new()
+	add_child(bg)
+
+	_playfield = Node2D.new()
+	add_child(_playfield)
+
+	_hud = HUD_SCENE.instantiate()
+	add_child(_hud)
+	_hud.pause_pressed.connect(_on_pause_pressed)
+	_hud.restart_pressed.connect(restart_level)
+
+	_pause_modal = PAUSE_SCENE.instantiate()
+	add_child(_pause_modal)
+	_pause_modal.resumed.connect(_on_resumed)
+	_pause_modal.restarted.connect(restart_level)
+	_pause_modal.level_select_requested.connect(_exit_to_level_select)
+
+	_result_modal = RESULT_SCENE.instantiate()
+	add_child(_result_modal)
+	_result_modal.next_requested.connect(_next_level)
+	_result_modal.replay_requested.connect(restart_level)
+	_result_modal.level_select_requested.connect(_exit_to_level_select)
+
+	load_level(world_id, level_index)
+
+
+func load_level(p_world_id: String, p_level_index: int) -> void:
+	get_tree().paused = false
+	world_id = p_world_id
+	level_index = p_level_index
+	_finished = false
+	_stars_collected = 0
+	_fans.clear()
+	_tap_ripples.clear()
+
+	if _pause_modal != null:
+		_pause_modal.visible = false
+	if _result_modal != null:
+		_result_modal.visible = false
+
+	if _droplet != null and is_instance_valid(_droplet):
+		_droplet.freeze_for_end()
+	for child in _playfield.get_children():
+		_playfield.remove_child(child)
+		child.queue_free()
+
+	_level_data = LevelRegistry.get_level_meta(world_id, level_index)
+	if _level_data.is_empty():
+		push_error("Could not load level %s #%d" % [world_id, level_index])
+		return
+
+	var built := LevelLoader.build_level(_playfield, _level_data)
+	_droplet = built["droplet"]
+	_seedling = built["seedling"]
+	_fans = built["fans"]
+
+	_droplet.state_changed.connect(_on_droplet_state_changed)
+	_droplet.lost.connect(_on_droplet_lost)
+	_seedling.watered.connect(_on_seedling_watered)
+
+	for col in built["collectibles"]:
+		(col as Collectible).collected.connect(_on_collectible_collected)
+
+	for dr in built["drains"]:
+		(dr as Drain).droplet_drained.connect(_on_droplet_drained)
+
+	_hud.configure_level(
+		level_index,
+		String(_level_data.get("title", "Level")),
+		String(_level_data.get("hint", ""))
+	)
+	_hud.set_active_state(int(_droplet.state))
+
+
+func restart_level() -> void:
+	get_tree().paused = false
+	load_level(world_id, level_index)
+
+
+func _next_level() -> void:
+	var count := LevelRegistry.get_level_count(world_id)
+	if level_index + 1 < count:
+		load_level(world_id, level_index + 1)
+	else:
+		_exit_to_level_select()
+
+
+func _exit_to_level_select() -> void:
+	get_tree().paused = false
+	back_to_level_select.emit()
+
+
+func _on_pause_pressed() -> void:
+	if _finished:
+		return
+	get_tree().paused = true
+	_pause_modal.open_modal()
+
+
+func _on_resumed() -> void:
+	_pause_modal.visible = false
+	get_tree().paused = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _finished or get_tree().paused:
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
+			_handle_playfield_tap(get_global_mouse_position())
+	elif event is InputEventKey:
+		var key := event as InputEventKey
+		if key.pressed and not key.echo:
+			if key.keycode == KEY_SPACE:
+				if _droplet != null:
+					_droplet.cycle_state()
+			elif key.keycode == KEY_R:
+				restart_level()
+
+
+func _handle_playfield_tap(pos: Vector2) -> void:
+	# Ignore taps in top HUD zone
+	if pos.y < 92.0:
+		return
+	# First check tappable level objects (Fans) so tapping a fan never switches state
+	for f in _fans:
+		var fan := f as Fan
+		if is_instance_valid(fan) and fan.contains_point(pos):
+			fan.toggle()
+			_tap_ripples.append({"pos": fan.global_position, "r": 16.0, "life": 0.28, "max_life": 0.28, "col": Color(0.32, 0.80, 0.68)})
+			return
+
+	# Otherwise cycle droplet state: WATER -> ICE -> STEAM -> WATER
+	if _droplet != null and is_instance_valid(_droplet):
+		_droplet.cycle_state()
+		_tap_ripples.append({"pos": pos, "r": 10.0, "life": 0.30, "max_life": 0.30, "col": _state_color(_droplet.state)})
+
+
+func _state_color(st: Droplet.State) -> Color:
+	match st:
+		Droplet.State.WATER:
+			return Color(0.24, 0.74, 0.96)
+		Droplet.State.ICE:
+			return Color(0.68, 0.92, 1.0)
+		_:
+			return Color(0.95, 0.98, 1.0)
+
+
+func _on_droplet_state_changed(new_state: int, _forced: bool) -> void:
+	_hud.set_active_state(new_state)
+
+
+func _on_collectible_collected(_item: Collectible) -> void:
+	_stars_collected = mini(3, _stars_collected + 1)
+	_hud.set_stars(_stars_collected)
+	AudioManager.play_sfx("collect_star", 1.0 + float(_stars_collected - 1) * 0.12)
+
+
+func _on_seedling_watered() -> void:
+	if _finished:
+		return
+	_finished = true
+	var level_id := String(_level_data.get("id", "greenhouse_%02d" % (level_index + 1)))
+	SaveManager.record_completion(level_id, _stars_collected)
+	var has_next := (level_index + 1) < LevelRegistry.get_level_count(world_id)
+	# Brief joyful pause to watch the seedling bloom before showing results
+	var timer := get_tree().create_timer(0.95)
+	timer.timeout.connect(func():
+		if is_instance_valid(self) and _finished:
+			_result_modal.show_win(_stars_collected, has_next)
+	)
+
+
+func _on_droplet_drained(droplet: Droplet) -> void:
+	if _finished:
+		return
+	droplet.freeze_for_end()
+	_trigger_fail("drain")
+
+
+func _on_droplet_lost(reason: String) -> void:
+	if _finished:
+		return
+	if _droplet != null and is_instance_valid(_droplet):
+		_droplet.freeze_for_end()
+	_trigger_fail(reason)
+
+
+func _trigger_fail(reason: String) -> void:
+	if _finished:
+		return
+	_finished = true
+	AudioManager.play_sfx("fail_drain")
+	var timer := get_tree().create_timer(0.45)
+	timer.timeout.connect(func():
+		if is_instance_valid(self) and _finished:
+			_result_modal.show_fail(reason)
+	)
+
+
+func _process(delta: float) -> void:
+	if _tap_ripples.is_empty():
+		return
+	for i in range(_tap_ripples.size() - 1, -1, -1):
+		var rp: Dictionary = _tap_ripples[i]
+		rp["life"] = float(rp["life"]) - delta
+		rp["r"] = float(rp["r"]) + delta * 145.0
+		if float(rp["life"]) <= 0.0:
+			_tap_ripples.remove_at(i)
+	queue_redraw()
+
+
+func _draw() -> void:
+	for rp in _tap_ripples:
+		var a: float = clampf(float(rp["life"]) / float(rp["max_life"]), 0.0, 1.0)
+		var col: Color = rp["col"]
+		col.a = a * 0.55
+		draw_arc(rp["pos"], float(rp["r"]), 0.0, TAU, 28, col, 3.0, true)

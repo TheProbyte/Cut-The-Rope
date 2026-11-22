@@ -1,0 +1,21 @@
+{
+  "worlds": [
+    {
+      "id": "greenhouse",
+      "name": "Greenhouse",
+      "subtitle": "Sunlit glass, warm mist & tender sprouts",
+      "levels": [
+        "res://data/levels/greenhouse/level_01.json",
+        "res://data/levels/greenhouse/level_02.json",
+        "res://data/levels/greenhouse/level_03.json",
+        "res://data/levels/greenhouse/level_04.json",
+        "res://data/levels/greenhouse/level_05.json",
+        "res://data/levels/greenhouse/level_06.json",
+        "res://data/levels/greenhouse/level_07.json",
+        "res://data/levels/greenhouse/level_08.json",
+        "res://data/levels/greenhouse/level_09.json",
+        "res://data/levels/greenhouse/level_10.json"
+      ]
+    }
+  ]
+}

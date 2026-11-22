@@ -1,0 +1,38 @@
+{
+  "id": "greenhouse_07",
+  "world": "greenhouse",
+  "title": "Cold Pipe",
+  "hint": "Cold pipes instantly condense Steam back into crisp Water droplets!",
+  "spawn": { "pos": [150, 855], "state": "water" },
+  "seedling": { "pos": [545, 965] },
+  "collectibles": [
+    { "pos": [150, 575] },
+    { "pos": [350, 278] },
+    { "pos": [545, 735] }
+  ],
+  "platforms": [
+    { "from": [80, 915], "to": [220, 915], "thickness": 22, "style": "wood" },
+    { "from": [80, 235], "to": [80, 920], "thickness": 22, "style": "stone" },
+    { "from": [225, 445], "to": [225, 1065], "thickness": 22, "style": "stone" },
+    { "from": [80, 235], "to": [465, 235], "thickness": 22, "style": "roof" },
+    { "from": [635, 235], "to": [635, 1015], "thickness": 22, "style": "stone" },
+    { "from": [455, 455], "to": [455, 1065], "thickness": 22, "style": "stone" },
+    { "from": [235, 1042], "to": [445, 1042], "thickness": 20, "style": "stone" },
+    { "from": [455, 1013], "to": [635, 1013], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [465, 585], "to": [625, 585], "thickness": 16 }
+  ],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [
+    { "pos": [120, 330], "direction": "right", "range": 460, "width": 135, "strength": 500, "initially_on": true }
+  ],
+  "cold_pipes": [
+    { "from": [475, 248], "to": [620, 248], "radius": 16 }
+  ],
+  "drains": [
+    { "pos": [340, 1022], "width": 120 }
+  ]
+}
