@@ -384,6 +384,98 @@ def render_icon_png(path: str, size: int) -> None:
     save_png_rgba(path, size, size, bytes(buf))
 
 
+def gen_sponge_soak() -> list[float]:
+    dur = 0.24
+    n = int(SAMPLE_RATE * dur)
+    rng = random.Random(55)
+    lp = 0.0
+    out = []
+    phase = 0.0
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        freq = 220.0 + 340.0 * (t / dur)
+        phase += 2.0 * math.pi * freq / SAMPLE_RATE
+        lp = lp * 0.85 + (rng.random() * 2.0 - 1.0) * 0.15
+        squish = math.sin(phase) * 0.55 + lp * 0.45
+        out.append(squish * env_ad(t, 0.015, dur, 1.8))
+    return out
+
+
+def gen_sponge_squeeze() -> list[float]:
+    dur = 0.26
+    n = int(SAMPLE_RATE * dur)
+    rng = random.Random(77)
+    lp = 0.0
+    out = []
+    phase = 0.0
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        freq = 560.0 - 220.0 * (t / dur) + math.sin(t * 48.0) * 45.0
+        phase += 2.0 * math.pi * freq / SAMPLE_RATE
+        lp = lp * 0.78 + (rng.random() * 2.0 - 1.0) * 0.22
+        out.append((math.sin(phase) * 0.62 + lp * 0.55) * env_ad(t, 0.008, dur, 2.0))
+    return out
+
+
+def gen_hotplate_sizzle() -> list[float]:
+    dur = 0.45
+    n = int(SAMPLE_RATE * dur)
+    rng = random.Random(91)
+    hp_prev = 0.0
+    out = []
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        w = rng.random() * 2.0 - 1.0
+        hp = w - hp_prev * 0.65
+        hp_prev = w
+        crackle = (1.0 if rng.random() > 0.92 else 0.35)
+        out.append(hp * crackle * env_ad(t, 0.012, dur, 1.4))
+    return out
+
+
+def gen_star_fanfare() -> list[float]:
+    dur = 0.38
+    n = int(SAMPLE_RATE * dur)
+    out = []
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        s = (math.sin(2.0 * math.pi * 880.0 * t) * 0.55
+             + math.sin(2.0 * math.pi * 1318.5 * t) * 0.32
+             + math.sin(2.0 * math.pi * 1760.0 * t) * 0.16)
+        out.append(s * env_ad(t, 0.004, dur, 2.5))
+    return out
+
+
+def render_soft_glow_png(path: str, size: int = 128) -> None:
+    buf = bytearray(size * size * 4)
+    for y in range(size):
+        v = (y + 0.5) / size * 2.0 - 1.0
+        for x in range(size):
+            u = (x + 0.5) / size * 2.0 - 1.0
+            d = math.hypot(u, v)
+            a = max(0.0, 1.0 - d) ** 2.2
+            idx = (y * size + x) * 4
+            buf[idx] = 255
+            buf[idx + 1] = 255
+            buf[idx + 2] = 255
+            buf[idx + 3] = int(round(a * 255))
+    save_png_rgba(path, size, size, bytes(buf))
+
+
+def render_paper_grain_png(path: str, size: int = 128) -> None:
+    rng = random.Random(1337)
+    buf = bytearray(size * size * 4)
+    for i in range(size * size):
+        val = int(rng.uniform(225, 255))
+        a = int(rng.uniform(4, 18))
+        idx = i * 4
+        buf[idx] = val
+        buf[idx + 1] = int(val * 0.98)
+        buf[idx + 2] = int(val * 0.93)
+        buf[idx + 3] = a
+    save_png_rgba(path, size, size, bytes(buf))
+
+
 def main() -> None:
     sounds = {
         "state_water.wav": gen_state_water(),
@@ -398,6 +490,10 @@ def main() -> None:
         "fail_drain.wav": gen_fail_drain(),
         "ui_tap.wav": gen_ui_tap(),
         "ambient_greenhouse.wav": gen_ambient_greenhouse(),
+        "sponge_soak.wav": gen_sponge_soak(),
+        "sponge_squeeze.wav": gen_sponge_squeeze(),
+        "hotplate_sizzle.wav": gen_hotplate_sizzle(),
+        "star_fanfare.wav": gen_star_fanfare(),
     }
     for name, data in sounds.items():
         write_wav(name, data)
@@ -406,6 +502,11 @@ def main() -> None:
     render_icon_png(os.path.join(ICON_DIR, "icon_192.png"), 192)
     render_icon_png(os.path.join(ICON_DIR, "icon_432.png"), 432)
     print(f"Generated PNG icons in {ICON_DIR}")
+
+    tex_dir = os.path.join(ROOT, "assets", "textures")
+    render_soft_glow_png(os.path.join(tex_dir, "soft_glow.png"), 128)
+    render_paper_grain_png(os.path.join(tex_dir, "paper_grain.png"), 128)
+    print(f"Generated PNG textures in {tex_dir}")
 
 
 if __name__ == "__main__":

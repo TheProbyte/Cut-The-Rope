@@ -1,0 +1,35 @@
+{
+  "id": "kitchen_01",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Soak It Up",
+  "hint": "Sponges soak up Water! Tap a soaked Sponge to squeeze it out.",
+  "spawn": { "pos": [125, 200], "state": "water" },
+  "seedling": { "pos": [245, 990] },
+  "collectibles": [
+    { "pos": [230, 290] },
+    { "pos": [400, 625] },
+    { "pos": [345, 795] }
+  ],
+  "platforms": [
+    { "from": [65, 260], "to": [345, 355], "thickness": 22, "style": "wood" },
+    { "from": [495, 625], "to": [635, 625], "thickness": 20, "style": "stone" },
+    { "from": [465, 755], "to": [275, 865], "thickness": 22, "style": "wood" },
+    { "from": [162, 845], "to": [162, 1040], "thickness": 20, "style": "wood" },
+    { "from": [160, 1038], "to": [345, 1038], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "sponges": [
+    { "pos": [400, 465], "size": [96, 46], "release_dir": "down", "launch_speed": 85 }
+  ],
+  "hot_plates": [],
+  "moving_platforms": [],
+  "drains": [
+    { "pos": [565, 605], "width": 98 }
+  ]
+}

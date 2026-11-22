@@ -1,0 +1,37 @@
+{
+  "id": "kitchen_03",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Sponge & Ice",
+  "hint": "Ice bounces right across Sponges! Cross Sponge 1 as Ice, then melt into Water to soak in Sponge 2.",
+  "spawn": { "pos": [110, 195], "state": "water" },
+  "seedling": { "pos": [330, 1015] },
+  "collectibles": [
+    { "pos": [280, 276] },
+    { "pos": [540, 645] },
+    { "pos": [465, 800] }
+  ],
+  "platforms": [
+    { "from": [55, 255], "to": [225, 304], "thickness": 20, "style": "wood" },
+    { "from": [335, 336], "to": [465, 374], "thickness": 20, "style": "wood" },
+    { "from": [210, 565], "to": [350, 565], "thickness": 20, "style": "stone" },
+    { "from": [600, 775], "to": [375, 875], "thickness": 22, "style": "wood" },
+    { "from": [240, 865], "to": [240, 1065], "thickness": 20, "style": "wood" },
+    { "from": [240, 1063], "to": [425, 1063], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "sponges": [
+    { "pos": [280, 322], "size": [104, 34], "rotation": 16, "release_dir": "down" },
+    { "pos": [540, 485], "size": [104, 46], "release_dir": "down", "launch_speed": 85 }
+  ],
+  "hot_plates": [
+    { "pos": [280, 545], "width": 110 }
+  ],
+  "moving_platforms": [],
+  "drains": []
+}

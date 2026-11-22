@@ -16,6 +16,23 @@
         "res://data/levels/greenhouse/level_09.json",
         "res://data/levels/greenhouse/level_10.json"
       ]
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "subtitle": "Plump sponges, hot plates & sliding trays",
+      "levels": [
+        "res://data/levels/kitchen/level_11.json",
+        "res://data/levels/kitchen/level_12.json",
+        "res://data/levels/kitchen/level_13.json",
+        "res://data/levels/kitchen/level_14.json",
+        "res://data/levels/kitchen/level_15.json",
+        "res://data/levels/kitchen/level_16.json",
+        "res://data/levels/kitchen/level_17.json",
+        "res://data/levels/kitchen/level_18.json",
+        "res://data/levels/kitchen/level_19.json",
+        "res://data/levels/kitchen/level_20.json"
+      ]
     }
   ]
 }

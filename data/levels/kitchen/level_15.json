@@ -1,0 +1,39 @@
+{
+  "id": "kitchen_05",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Sliding Tray",
+  "hint": "Ride the sliding kitchen tray across the Hot Plates into the Sponge, then squeeze to drop through the grate!",
+  "spawn": { "pos": [190, 210], "state": "water" },
+  "seedling": { "pos": [555, 980] },
+  "collectibles": [
+    { "pos": [190, 415] },
+    { "pos": [355, 575] },
+    { "pos": [555, 835] }
+  ],
+  "platforms": [
+    { "from": [185, 1020], "to": [465, 1020], "thickness": 20, "style": "stone" },
+    { "from": [470, 690], "to": [470, 1030], "thickness": 20, "style": "stone" },
+    { "from": [640, 520], "to": [640, 1030], "thickness": 20, "style": "stone" },
+    { "from": [470, 1028], "to": [640, 1028], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [480, 745], "to": [630, 745], "thickness": 16 }
+  ],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "sponges": [
+    { "pos": [555, 575], "size": [104, 50], "release_dir": "down", "launch_speed": 90 }
+  ],
+  "hot_plates": [
+    { "pos": [265, 1000], "width": 115 },
+    { "pos": [390, 1000], "width": 115 }
+  ],
+  "moving_platforms": [
+    { "from": [190, 610], "to": [485, 610], "length": 152, "thickness": 20, "speed": 0.25, "phase": 0.72 }
+  ],
+  "drains": []
+}

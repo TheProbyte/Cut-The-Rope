@@ -5,6 +5,7 @@ signal resumed
 signal restarted
 signal level_select_requested
 
+var _card: PanelContainer
 var _music_btn: Button
 var _sfx_btn: Button
 
@@ -26,32 +27,32 @@ func _build_ui() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(460, 440)
-	card.add_theme_stylebox_override("panel", UIThemeHelper.make_panel_style(
-		Color(0.97, 0.99, 0.94),
-		Color(0.46, 0.66, 0.50),
-		28,
-		4
+	_card = PanelContainer.new()
+	_card.custom_minimum_size = Vector2(476, 460)
+	_card.add_theme_stylebox_override("panel", UIThemeHelper.make_panel_style(
+		Color(0.99, 0.98, 0.94),
+		Color(0.44, 0.66, 0.48),
+		30,
+		3,
+		7
 	))
-	center.add_child(card)
+	center.add_child(_card)
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 18)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	card.add_child(vbox)
+	_card.add_child(vbox)
 
 	var title := Label.new()
 	title.text = "PAUSED"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 40)
-	title.add_theme_color_override("font_color", Color(0.20, 0.36, 0.24))
+	UIThemeHelper.apply_display_font(title, 44, Color(0.18, 0.36, 0.24))
 	vbox.add_child(title)
 
 	var resume_btn := Button.new()
 	resume_btn.text = "RESUME"
-	resume_btn.custom_minimum_size = Vector2(0, 64)
-	UIThemeHelper.style_button(resume_btn, Color(0.32, 0.72, 0.44), Color(0.38, 0.78, 0.50), Color(0.24, 0.60, 0.36), Color.WHITE, 26)
+	resume_btn.custom_minimum_size = Vector2(0, 68)
+	UIThemeHelper.style_button(resume_btn, Color(0.28, 0.72, 0.44), Color(0.35, 0.78, 0.50), Color(0.22, 0.60, 0.36), Color.WHITE, 26, 20)
 	resume_btn.pressed.connect(func():
 		AudioManager.play_sfx("ui_tap")
 		resumed.emit()
@@ -60,8 +61,8 @@ func _build_ui() -> void:
 
 	var restart_btn := Button.new()
 	restart_btn.text = "RESTART LEVEL"
-	restart_btn.custom_minimum_size = Vector2(0, 60)
-	UIThemeHelper.style_button(restart_btn, Color(0.86, 0.58, 0.28), Color(0.92, 0.64, 0.34), Color(0.74, 0.46, 0.20), Color.WHITE, 24)
+	restart_btn.custom_minimum_size = Vector2(0, 62)
+	UIThemeHelper.style_button(restart_btn, Color(0.88, 0.58, 0.26), Color(0.94, 0.65, 0.34), Color(0.76, 0.46, 0.18), Color.WHITE, 24, 18)
 	restart_btn.pressed.connect(func():
 		AudioManager.play_sfx("ui_tap")
 		restarted.emit()
@@ -74,7 +75,7 @@ func _build_ui() -> void:
 
 	_music_btn = Button.new()
 	_music_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_music_btn.custom_minimum_size = Vector2(0, 54)
+	_music_btn.custom_minimum_size = Vector2(0, 56)
 	_music_btn.pressed.connect(func():
 		AudioManager.toggle_music()
 		AudioManager.play_sfx("ui_tap")
@@ -84,7 +85,7 @@ func _build_ui() -> void:
 
 	_sfx_btn = Button.new()
 	_sfx_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_sfx_btn.custom_minimum_size = Vector2(0, 54)
+	_sfx_btn.custom_minimum_size = Vector2(0, 56)
 	_sfx_btn.pressed.connect(func():
 		AudioManager.toggle_sfx()
 		AudioManager.play_sfx("ui_tap")
@@ -95,7 +96,7 @@ func _build_ui() -> void:
 	var levels_btn := Button.new()
 	levels_btn.text = "LEVEL SELECT"
 	levels_btn.custom_minimum_size = Vector2(0, 58)
-	UIThemeHelper.style_button(levels_btn, Color(0.46, 0.62, 0.54), Color(0.54, 0.70, 0.62), Color(0.38, 0.52, 0.45), Color.WHITE, 22)
+	UIThemeHelper.style_button(levels_btn, Color(0.42, 0.62, 0.54), Color(0.50, 0.70, 0.62), Color(0.34, 0.52, 0.45), Color.WHITE, 22, 18)
 	levels_btn.pressed.connect(func():
 		AudioManager.play_sfx("ui_tap")
 		level_select_requested.emit()
@@ -108,6 +109,11 @@ func _build_ui() -> void:
 func open_modal() -> void:
 	_refresh_audio_buttons()
 	visible = true
+	_card.pivot_offset = _card.custom_minimum_size * 0.5
+	_card.scale = Vector2(0.78, 0.78)
+	var tw := create_tween()
+	tw.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(_card, "scale", Vector2.ONE, 0.24).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _refresh_audio_buttons() -> void:
@@ -115,21 +121,21 @@ func _refresh_audio_buttons() -> void:
 	_music_btn.text = "MUSIC: ON" if m_on else "MUSIC: OFF"
 	UIThemeHelper.style_button(
 		_music_btn,
-		Color(0.28, 0.64, 0.74) if m_on else Color(0.62, 0.68, 0.66),
-		Color(0.34, 0.70, 0.80) if m_on else Color(0.68, 0.74, 0.72),
-		Color(0.22, 0.54, 0.64),
+		Color(0.24, 0.64, 0.78) if m_on else Color(0.62, 0.68, 0.66),
+		Color(0.30, 0.70, 0.84) if m_on else Color(0.68, 0.74, 0.72),
+		Color(0.18, 0.54, 0.66),
 		Color.WHITE,
 		20,
-		14
+		16
 	)
 	var s_on := SaveManager.is_sfx_enabled()
 	_sfx_btn.text = "SFX: ON" if s_on else "SFX: OFF"
 	UIThemeHelper.style_button(
 		_sfx_btn,
-		Color(0.28, 0.64, 0.74) if s_on else Color(0.62, 0.68, 0.66),
-		Color(0.34, 0.70, 0.80) if s_on else Color(0.68, 0.74, 0.72),
-		Color(0.22, 0.54, 0.64),
+		Color(0.24, 0.64, 0.78) if s_on else Color(0.62, 0.68, 0.66),
+		Color(0.30, 0.70, 0.84) if s_on else Color(0.68, 0.74, 0.72),
+		Color(0.18, 0.54, 0.66),
 		Color.WHITE,
 		20,
-		14
+		16
 	)

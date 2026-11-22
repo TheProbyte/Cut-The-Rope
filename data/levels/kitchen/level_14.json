@@ -1,0 +1,40 @@
+{
+  "id": "kitchen_04",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Steam Kettle",
+  "hint": "Squeeze the Sponge into the Heat Lamp! Rising Steam slips right past Sponges to the Cold Pipe.",
+  "spawn": { "pos": [115, 200], "state": "water" },
+  "seedling": { "pos": [560, 975] },
+  "collectibles": [
+    { "pos": [285, 315] },
+    { "pos": [415, 232] },
+    { "pos": [520, 620] }
+  ],
+  "platforms": [
+    { "from": [60, 260], "to": [235, 340], "thickness": 22, "style": "wood" },
+    { "from": [205, 740], "to": [365, 740], "thickness": 22, "style": "wood" },
+    { "from": [195, 220], "to": [525, 165], "thickness": 22, "style": "roof" },
+    { "from": [475, 360], "to": [475, 1020], "thickness": 20, "style": "stone" },
+    { "from": [640, 205], "to": [640, 1020], "thickness": 20, "style": "stone" },
+    { "from": [475, 1023], "to": [640, 1023], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [485, 495], "to": [630, 495], "thickness": 16 }
+  ],
+  "glass_panes": [],
+  "heat_lamps": [
+    { "pos": [285, 625], "size": [140, 215] }
+  ],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [
+    { "from": [530, 215], "to": [630, 215], "radius": 16 }
+  ],
+  "sponges": [
+    { "pos": [285, 420], "size": [96, 44], "release_dir": "down", "launch_speed": 95 }
+  ],
+  "hot_plates": [],
+  "moving_platforms": [],
+  "drains": []
+}

@@ -81,6 +81,16 @@ func get_world_stars(world_id: String) -> Vector2i:
 	return Vector2i(earned, levels.size() * 3)
 
 
+func get_total_stars() -> Vector2i:
+	var earned := 0
+	var total := 0
+	for w in LevelRegistry.get_worlds():
+		var ws := get_world_stars(String(w.get("id", "")))
+		earned += ws.x
+		total += ws.y
+	return Vector2i(earned, total)
+
+
 func is_music_enabled() -> bool:
 	return bool(_data.get("music_enabled", true))
 

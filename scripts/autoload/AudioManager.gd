@@ -12,6 +12,10 @@ const SFX_PATHS := {
 	"seedling_shiver": "res://assets/audio/seedling_shiver.wav",
 	"fail_drain": "res://assets/audio/fail_drain.wav",
 	"ui_tap": "res://assets/audio/ui_tap.wav",
+	"sponge_soak": "res://assets/audio/sponge_soak.wav",
+	"sponge_squeeze": "res://assets/audio/sponge_squeeze.wav",
+	"hotplate_sizzle": "res://assets/audio/hotplate_sizzle.wav",
+	"star_fanfare": "res://assets/audio/star_fanfare.wav",
 }
 
 const BGM_PATH := "res://assets/audio/ambient_greenhouse.wav"

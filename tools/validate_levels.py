@@ -79,6 +79,16 @@ def validate_level(path: str, expected_world: str) -> list[str]:
     for idx, drain in enumerate(data.get("drains", [])):
         check_point(drain.get("pos"), f"{path} drains[{idx}].pos", errors)
 
+    for idx, hp in enumerate(data.get("hot_plates", [])):
+        check_point(hp.get("pos"), f"{path} hot_plates[{idx}].pos", errors)
+
+    for idx, sp in enumerate(data.get("sponges", [])):
+        check_point(sp.get("pos"), f"{path} sponges[{idx}].pos", errors)
+
+    for idx, mp in enumerate(data.get("moving_platforms", [])):
+        check_point(mp.get("from"), f"{path} moving_platforms[{idx}].from", errors)
+        check_point(mp.get("to"), f"{path} moving_platforms[{idx}].to", errors)
+
     return errors
 
 

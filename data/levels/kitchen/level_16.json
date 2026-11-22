@@ -1,0 +1,38 @@
+{
+  "id": "kitchen_06",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Pantry Timing",
+  "hint": "Time your Sponge squeeze so Water lands cleanly on the sliding tray, then ride it to Sponge 2!",
+  "spawn": { "pos": [360, 185], "state": "water" },
+  "seedling": { "pos": [565, 975] },
+  "collectibles": [
+    { "pos": [360, 480] },
+    { "pos": [470, 610] },
+    { "pos": [565, 815] }
+  ],
+  "platforms": [
+    { "from": [165, 1020], "to": [475, 1020], "thickness": 20, "style": "stone" },
+    { "from": [480, 710], "to": [480, 1030], "thickness": 20, "style": "stone" },
+    { "from": [650, 520], "to": [650, 1030], "thickness": 20, "style": "stone" },
+    { "from": [480, 1023], "to": [650, 1023], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "sponges": [
+    { "pos": [360, 310], "size": [96, 46], "release_dir": "down", "launch_speed": 95 },
+    { "pos": [555, 605], "size": [114, 48], "release_dir": "down", "launch_speed": 95 }
+  ],
+  "hot_plates": [
+    { "pos": [250, 1000], "width": 120 },
+    { "pos": [395, 1000], "width": 120 }
+  ],
+  "moving_platforms": [
+    { "from": [185, 645], "to": [535, 645], "length": 154, "thickness": 20, "speed": 0.22, "phase": 0.0 }
+  ],
+  "drains": []
+}

@@ -1,0 +1,42 @@
+{
+  "id": "kitchen_07",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Drafty Stove",
+  "hint": "Blow Steam over the Hot Plates into the Freezer Zone—Ice will smash the glass straight down!",
+  "spawn": { "pos": [145, 855], "state": "water" },
+  "seedling": { "pos": [545, 965] },
+  "collectibles": [
+    { "pos": [145, 575] },
+    { "pos": [355, 278] },
+    { "pos": [545, 675] }
+  ],
+  "platforms": [
+    { "from": [80, 915], "to": [215, 915], "thickness": 22, "style": "wood" },
+    { "from": [80, 235], "to": [80, 920], "thickness": 22, "style": "stone" },
+    { "from": [225, 445], "to": [225, 1030], "thickness": 22, "style": "stone" },
+    { "from": [80, 235], "to": [635, 235], "thickness": 22, "style": "roof" },
+    { "from": [635, 235], "to": [635, 1020], "thickness": 22, "style": "stone" },
+    { "from": [455, 445], "to": [455, 1030], "thickness": 22, "style": "stone" },
+    { "from": [235, 1015], "to": [445, 1015], "thickness": 20, "style": "stone" },
+    { "from": [455, 1013], "to": [635, 1013], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [
+    { "from": [465, 545], "to": [625, 545], "thickness": 14 }
+  ],
+  "heat_lamps": [],
+  "freezer_zones": [
+    { "pos": [545, 325], "size": [148, 136] }
+  ],
+  "fans": [
+    { "pos": [120, 325], "direction": "right", "range": 470, "width": 135, "strength": 520, "initially_on": false }
+  ],
+  "cold_pipes": [],
+  "sponges": [],
+  "hot_plates": [
+    { "pos": [340, 995], "width": 150 }
+  ],
+  "moving_platforms": [],
+  "drains": []
+}

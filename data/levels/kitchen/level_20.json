@@ -1,0 +1,58 @@
+{
+  "id": "kitchen_10",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Grand Kitchen Finale",
+  "hint": "Every skill together: cross Sponge 1 as Ice, smash glass, ride Heat & Fan to the Cold Pipe, then ferry to bloom!",
+  "spawn": { "pos": [108, 185], "state": "water" },
+  "seedling": { "pos": [468, 932] },
+  "collectibles": [
+    { "pos": [270, 266] },
+    { "pos": [345, 655] },
+    { "pos": [172, 855] }
+  ],
+  "platforms": [
+    { "from": [58, 240], "to": [210, 286], "thickness": 20, "style": "wood" },
+    { "from": [330, 323], "to": [455, 361], "thickness": 20, "style": "wood" },
+    { "from": [200, 472], "to": [340, 472], "thickness": 18, "style": "stone" },
+    { "from": [452, 375], "to": [452, 445], "thickness": 18, "style": "stone" },
+    { "from": [592, 315], "to": [592, 445], "thickness": 18, "style": "stone" },
+    { "from": [445, 815], "to": [625, 815], "thickness": 22, "style": "wood" },
+    { "from": [665, 475], "to": [665, 820], "thickness": 20, "style": "stone" },
+    { "from": [95, 520], "to": [455, 520], "thickness": 20, "style": "roof" },
+    { "from": [95, 520], "to": [95, 955], "thickness": 20, "style": "stone" },
+    { "from": [545, 845], "to": [545, 985], "thickness": 20, "style": "wood" },
+    { "from": [405, 980], "to": [555, 980], "thickness": 24, "style": "wood" },
+    { "from": [565, 1068], "to": [685, 1068], "thickness": 20, "style": "stone" }
+  ],
+  "grates": [
+    { "from": [105, 685], "to": [240, 685], "thickness": 16 }
+  ],
+  "glass_panes": [
+    { "from": [460, 428], "to": [584, 428], "thickness": 14 }
+  ],
+  "heat_lamps": [
+    { "pos": [522, 705], "size": [140, 200] }
+  ],
+  "freezer_zones": [
+    { "pos": [522, 360], "size": [120, 90] }
+  ],
+  "fans": [
+    { "pos": [625, 588], "direction": "left", "range": 485, "width": 135, "strength": 560, "initially_on": false }
+  ],
+  "cold_pipes": [
+    { "from": [108, 542], "to": [182, 542], "radius": 16 }
+  ],
+  "sponges": [
+    { "pos": [270, 305], "size": [104, 34], "rotation": 17, "release_dir": "down" },
+    { "pos": [172, 770], "size": [102, 46], "release_dir": "down", "launch_speed": 95 }
+  ],
+  "hot_plates": [
+    { "pos": [270, 452], "width": 106 },
+    { "pos": [625, 1048], "width": 102 }
+  ],
+  "moving_platforms": [
+    { "from": [175, 925], "to": [455, 925], "length": 152, "thickness": 20, "speed": 0.25, "phase": 0.0 }
+  ],
+  "drains": []
+}

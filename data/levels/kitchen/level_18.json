@@ -1,0 +1,41 @@
+{
+  "id": "kitchen_08",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Double Sponge",
+  "hint": "Relay Water from Sponge 1 across the sliding tray to Sponge 2, then drop cleanly through the grate!",
+  "spawn": { "pos": [120, 195], "state": "water" },
+  "seedling": { "pos": [560, 975] },
+  "collectibles": [
+    { "pos": [265, 480] },
+    { "pos": [425, 550] },
+    { "pos": [560, 815] }
+  ],
+  "platforms": [
+    { "from": [65, 255], "to": [225, 312], "thickness": 22, "style": "wood" },
+    { "from": [195, 1020], "to": [470, 1020], "thickness": 20, "style": "stone" },
+    { "from": [475, 690], "to": [475, 1030], "thickness": 20, "style": "stone" },
+    { "from": [645, 500], "to": [645, 1030], "thickness": 20, "style": "stone" },
+    { "from": [475, 1023], "to": [645, 1023], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [
+    { "from": [485, 720], "to": [635, 720], "thickness": 16 }
+  ],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "sponges": [
+    { "pos": [265, 375], "size": [96, 46], "release_dir": "down", "launch_speed": 95 },
+    { "pos": [560, 545], "size": [96, 46], "release_dir": "down", "launch_speed": 95 }
+  ],
+  "hot_plates": [
+    { "pos": [275, 1000], "width": 110 },
+    { "pos": [400, 1000], "width": 110 }
+  ],
+  "moving_platforms": [
+    { "from": [255, 585], "to": [515, 585], "length": 144, "thickness": 20, "speed": 0.30, "phase": 0.5 }
+  ],
+  "drains": []
+}

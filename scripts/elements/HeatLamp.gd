@@ -1,6 +1,8 @@
 class_name HeatLamp
 extends Area2D
 
+const HEAT_SHIMMER_SHADER := preload("res://assets/shaders/heat_shimmer.gdshader")
+
 var zone_size: Vector2 = Vector2(120.0, 180.0)
 var _time: float = 0.0
 var _motes: Array[Vector2] = []
@@ -19,6 +21,16 @@ func configure(cfg: Dictionary) -> void:
 	rect.size = zone_size
 	shape.shape = rect
 	add_child(shape)
+
+	var shimmer := ColorRect.new()
+	shimmer.position = -zone_size * 0.5
+	shimmer.size = zone_size
+	shimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	mat.shader = HEAT_SHIMMER_SHADER
+	mat.set_shader_parameter("glow_color", Color(1.0, 0.62, 0.20, 0.28))
+	shimmer.material = mat
+	add_child(shimmer)
 
 	for i in range(8):
 		_motes.append(Vector2(randf_range(-0.4, 0.4), randf_range(-0.45, 0.45)))

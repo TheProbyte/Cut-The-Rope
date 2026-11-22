@@ -1,0 +1,35 @@
+{
+  "id": "kitchen_02",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Sizzle Stop",
+  "hint": "Watch out for glowing Hot Plates! Float over them as Steam, then drop cleanly as Water.",
+  "spawn": { "pos": [150, 845], "state": "water" },
+  "seedling": { "pos": [545, 965] },
+  "collectibles": [
+    { "pos": [150, 560] },
+    { "pos": [380, 282] },
+    { "pos": [545, 595] }
+  ],
+  "platforms": [
+    { "from": [85, 905], "to": [220, 905], "thickness": 22, "style": "wood" },
+    { "from": [85, 815], "to": [85, 910], "thickness": 20, "style": "stone" },
+    { "from": [250, 520], "to": [250, 1020], "thickness": 22, "style": "stone" },
+    { "from": [85, 295], "to": [600, 195], "thickness": 22, "style": "roof" },
+    { "from": [260, 1008], "to": [465, 1008], "thickness": 20, "style": "stone" },
+    { "from": [470, 1013], "to": [635, 1013], "thickness": 24, "style": "wood" }
+  ],
+  "grates": [],
+  "glass_panes": [],
+  "heat_lamps": [],
+  "freezer_zones": [],
+  "fans": [],
+  "cold_pipes": [],
+  "sponges": [],
+  "hot_plates": [
+    { "pos": [315, 988], "width": 96 },
+    { "pos": [415, 988], "width": 96 }
+  ],
+  "moving_platforms": [],
+  "drains": []
+}

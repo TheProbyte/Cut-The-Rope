@@ -1,0 +1,50 @@
+{
+  "id": "kitchen_09",
+  "world": "kitchen",
+  "theme": "kitchen",
+  "title": "Chef's Contraption",
+  "hint": "Heat Lamp -> Cold Pipe -> Sponge 1 -> Sliding Tray -> Sponge 2 -> Freezer smash!",
+  "spawn": { "pos": [115, 195], "state": "water" },
+  "seedling": { "pos": [225, 1005] },
+  "collectibles": [
+    { "pos": [370, 232] },
+    { "pos": [545, 515] },
+    { "pos": [225, 895] }
+  ],
+  "platforms": [
+    { "from": [60, 255], "to": [230, 332], "thickness": 22, "style": "wood" },
+    { "from": [180, 545], "to": [335, 545], "thickness": 22, "style": "wood" },
+    { "from": [170, 210], "to": [515, 155], "thickness": 22, "style": "roof" },
+    { "from": [640, 200], "to": [640, 680], "thickness": 20, "style": "stone" },
+    { "from": [135, 700], "to": [135, 830], "thickness": 20, "style": "stone" },
+    { "from": [315, 700], "to": [315, 830], "thickness": 20, "style": "stone" },
+    { "from": [135, 1053], "to": [325, 1053], "thickness": 24, "style": "wood" },
+    { "from": [360, 1045], "to": [640, 1045], "thickness": 20, "style": "stone" }
+  ],
+  "grates": [],
+  "glass_panes": [
+    { "from": [145, 805], "to": [305, 805], "thickness": 14 }
+  ],
+  "heat_lamps": [
+    { "pos": [255, 435], "size": [132, 208] }
+  ],
+  "freezer_zones": [
+    { "pos": [225, 718], "size": [156, 128] }
+  ],
+  "fans": [],
+  "cold_pipes": [
+    { "from": [525, 208], "to": [630, 208], "radius": 16 }
+  ],
+  "sponges": [
+    { "pos": [545, 410], "size": [108, 46], "release_dir": "down", "launch_speed": 95 },
+    { "pos": [225, 588], "size": [104, 46], "release_dir": "down", "launch_speed": 95 }
+  ],
+  "hot_plates": [
+    { "pos": [440, 1025], "width": 115 },
+    { "pos": [575, 1025], "width": 115 }
+  ],
+  "moving_platforms": [
+    { "from": [545, 625], "to": [295, 625], "length": 148, "thickness": 20, "speed": 0.24, "phase": 0.0 }
+  ],
+  "drains": []
+}
